@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "boxAI",
-    "slug": "boxAI",
+    "name": "expo-sphere",
+    "slug": "expo-sphere",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
-    "scheme": "boxAI",
+    "scheme": "expo-sphere",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -31,6 +31,14 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#333333"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow ExpoSphere to access your camera",
+          "microphonePermission": "Allow ExpoSphere to access your microphone",
+          "recordAudioAndroid": true
         }
       ],
       "expo-video",

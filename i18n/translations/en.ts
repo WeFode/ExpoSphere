@@ -19,6 +19,10 @@ export default {
         title: "File System",
         description: "File system example",
       },
+      imagePicker: {
+        title: "Image Picker",
+        description: "Image picker example",
+      },
       gestures: {
         title: "Gestures",
         description: "Gesture interaction example",

@@ -3,14 +3,14 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
   Alert,
-  Image,
   FlatList,
   Platform,
+  KeyboardAvoidingView,
+  StatusBar,
 } from "react-native";
 import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
@@ -18,719 +18,439 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as FileSystem from "expo-file-system";
 
-// 应用场景数据
-const USE_CASES = [
-  {
-    id: "userdata",
-    title: "用户数据存储",
-    description: "保存应用设置、用户偏好等持久化数据",
-    icon: "settings-outline",
-    color: "#4CAF50",
-  },
-  {
-    id: "media",
-    title: "媒体文件管理",
-    description: "保存和管理照片、视频、音频等媒体文件",
-    icon: "images-outline",
-    color: "#FFA000",
-  },
-  {
-    id: "cache",
-    title: "缓存管理",
-    description: "缓存网络请求数据，实现离线访问",
-    icon: "cloud-done-outline",
-    color: "#2196F3",
-  },
-  {
-    id: "download",
-    title: "文件下载与分享",
-    description: "下载网络资源并能与其他应用分享",
-    icon: "download-outline",
-    color: "#9C27B0",
-  },
-];
+// 定义 Todo 类型
+interface Todo {
+  id: string;
+  title: string;
+  completed: boolean;
+  createdAt: string;
+}
 
-// 示例图片和文件数据
-const SAMPLE_IMAGES = [
-  "https://images.unsplash.com/photo-1580137189272-c9379f8864fd?q=80&w=600",
-  "https://images.unsplash.com/photo-1579546929662-711aa81148cf?q=80&w=600",
-  "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=600",
-];
-
-const SAMPLE_SETTINGS = {
-  darkMode: true,
-  notifications: true,
-  language: "zh-CN",
-  fontSize: 16,
-  lastUpdated: new Date().toISOString(),
-};
-
-// 介绍区域组件
-const IntroductionSection = ({ colors }: { colors: any }) => {
-  return (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        什么是文件系统？
-      </Text>
-      <View style={[styles.card, { backgroundColor: colors.card }]}>
-        <Text style={[styles.normalText, { color: colors.text }]}>
-          文件系统(FileSystem)是应用程序在设备上存储和管理数据的基础设施。通过文件系统API，我们可以：
-        </Text>
-
-        <View style={styles.bulletContainer}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.tint} />
-          <Text style={[styles.bulletText, { color: colors.text }]}>
-            读写文本文件、存储JSON数据
-          </Text>
-        </View>
-
-        <View style={styles.bulletContainer}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.tint} />
-          <Text style={[styles.bulletText, { color: colors.text }]}>
-            管理和操作设备上的图片、视频等媒体文件
-          </Text>
-        </View>
-
-        <View style={styles.bulletContainer}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.tint} />
-          <Text style={[styles.bulletText, { color: colors.text }]}>
-            缓存网络数据，提高应用离线体验
-          </Text>
-        </View>
-
-        <View style={styles.bulletContainer}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.tint} />
-          <Text style={[styles.bulletText, { color: colors.text }]}>
-            下载和分享文件，与其他应用交互
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-};
-
-// 文件系统目录介绍
-const FileSystemDirectoriesSection = ({ colors }: { colors: any }) => {
-  return (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        关键目录类型
-      </Text>
-
-      <View style={styles.directoriesContainer}>
-        <View style={[styles.directoryCard, { backgroundColor: colors.card }]}>
-          <View
-            style={[
-              styles.directoryIconContainer,
-              { backgroundColor: "#4CAF50" },
-            ]}
-          >
-            <Ionicons name="document" size={24} color="#FFFFFF" />
-          </View>
-          <Text style={[styles.directoryTitle, { color: colors.text }]}>
-            文档目录
-          </Text>
-          <Text
-            style={[
-              styles.directoryDescription,
-              { color: colors.secondaryAccent },
-            ]}
-          >
-            长期存储重要数据，不会被系统自动清理
-          </Text>
-          <Text style={[styles.codeText, { color: colors.text }]}>
-            {FileSystem.documentDirectory}
-          </Text>
-
-          <View style={styles.usageTagContainer}>
-            <View style={[styles.usageTag, { backgroundColor: "#4CAF5033" }]}>
-              <Text style={[styles.usageTagText, { color: "#4CAF50" }]}>
-                用户设置
-              </Text>
-            </View>
-            <View style={[styles.usageTag, { backgroundColor: "#4CAF5033" }]}>
-              <Text style={[styles.usageTagText, { color: "#4CAF50" }]}>
-                重要数据
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={[styles.directoryCard, { backgroundColor: colors.card }]}>
-          <View
-            style={[
-              styles.directoryIconContainer,
-              { backgroundColor: "#2196F3" },
-            ]}
-          >
-            <Ionicons name="cloud-done" size={24} color="#FFFFFF" />
-          </View>
-          <Text style={[styles.directoryTitle, { color: colors.text }]}>
-            缓存目录
-          </Text>
-          <Text
-            style={[
-              styles.directoryDescription,
-              { color: colors.secondaryAccent },
-            ]}
-          >
-            临时存储数据，可能会被系统在存储空间不足时清理
-          </Text>
-          <Text style={[styles.codeText, { color: colors.text }]}>
-            {FileSystem.cacheDirectory}
-          </Text>
-
-          <View style={styles.usageTagContainer}>
-            <View style={[styles.usageTag, { backgroundColor: "#2196F333" }]}>
-              <Text style={[styles.usageTagText, { color: "#2196F3" }]}>
-                网络缓存
-              </Text>
-            </View>
-            <View style={[styles.usageTag, { backgroundColor: "#2196F333" }]}>
-              <Text style={[styles.usageTagText, { color: "#2196F3" }]}>
-                临时文件
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-};
-
-// 用户数据存储场景示例
-const UserDataStorageExample = ({ colors }: { colors: any }) => {
-  const [settings, setSettings] = useState(SAMPLE_SETTINGS);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const settingsFilePath = FileSystem.documentDirectory + "settings.json";
-
-  // 保存设置
-  const saveSettings = async () => {
-    setIsSaving(true);
-    try {
-      await FileSystem.writeAsStringAsync(
-        settingsFilePath,
-        JSON.stringify({ ...settings, lastUpdated: new Date().toISOString() }),
-      );
-      Alert.alert("成功", "设置已保存到文档目录");
-    } catch (error) {
-      Alert.alert("错误", "保存设置失败: " + error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // 加载设置
-  const loadSettings = async () => {
-    setIsLoading(true);
-    try {
-      const fileInfo = await FileSystem.getInfoAsync(settingsFilePath);
-
-      if (fileInfo.exists) {
-        const content = await FileSystem.readAsStringAsync(settingsFilePath);
-        const loadedSettings = JSON.parse(content);
-        setSettings(loadedSettings);
-        Alert.alert("成功", "设置已从文件加载");
-      } else {
-        Alert.alert("提示", "尚未保存设置，使用默认设置");
-      }
-    } catch (error) {
-      Alert.alert("错误", "加载设置失败: " + error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 重置设置
-  const resetSettings = () => {
-    setSettings(SAMPLE_SETTINGS);
-  };
-
-  // 修复 toggleSetting 函数的类型错误
-  const toggleSetting = (key: "darkMode" | "notifications") => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
-  return (
-    <View style={styles.exampleContainer}>
-      <View style={styles.exampleHeader}>
-        <Ionicons name="settings-outline" size={20} color={colors.text} />
-        <Text style={[styles.exampleTitle, { color: colors.text }]}>
-          用户数据存储示例
-        </Text>
-      </View>
-
-      <View style={[styles.exampleCard, { backgroundColor: colors.card }]}>
-        <Text
-          style={[styles.exampleDescription, { color: colors.secondaryAccent }]}
-        >
-          应用通常需要保存用户设置、偏好等数据。这些数据可以存储为JSON文件在文档目录中，实现持久化存储。
-        </Text>
-
-        <View style={styles.settingsContainer}>
-          <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: colors.text }]}>
-              深色模式
-            </Text>
-            <TouchableOpacity onPress={() => toggleSetting("darkMode")}>
-              <Ionicons
-                name={settings.darkMode ? "checkbox" : "square-outline"}
-                size={24}
-                color={colors.tint}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: colors.text }]}>
-              推送通知
-            </Text>
-            <TouchableOpacity onPress={() => toggleSetting("notifications")}>
-              <Ionicons
-                name={settings.notifications ? "checkbox" : "square-outline"}
-                size={24}
-                color={colors.tint}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: colors.text }]}>
-              最后更新
-            </Text>
-            <Text
-              style={[styles.settingValue, { color: colors.secondaryAccent }]}
-            >
-              {new Date(settings.lastUpdated).toLocaleString()}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.tint }]}
-            onPress={saveSettings}
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={styles.actionButtonText}>保存设置</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: "#9E9E9E" }]}
-            onPress={loadSettings}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={styles.actionButtonText}>加载设置</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: "#F44336" }]}
-            onPress={resetSettings}
-          >
-            <Text style={styles.actionButtonText}>重置</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={[styles.exampleNotes, { color: colors.secondaryAccent }]}>
-          尝试修改设置并保存，然后尝试加载。这些设置会被永久保存在应用的文档目录中。
-        </Text>
-      </View>
-    </View>
-  );
-};
-
-// 缓存管理示例
-const CacheManagementExample = ({ colors }: { colors: any }) => {
-  const [cachedImages, setCachedImages] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [cacheSize, setCacheSize] = useState<string>("0 KB");
-
-  // 获取缓存目录信息
-  const getCacheInfo = async () => {
-    try {
-      // 检查缓存目录中的图片
-      const cacheDir = FileSystem.cacheDirectory + "images/";
-      const dirInfo = await FileSystem.getInfoAsync(cacheDir);
-
-      if (dirInfo.exists && dirInfo.isDirectory) {
-        const fileList = await FileSystem.readDirectoryAsync(cacheDir);
-        const imagePaths = fileList
-          .filter((file) => file.endsWith(".jpg") || file.endsWith(".png"))
-          .map((file) => cacheDir + file);
-
-        setCachedImages(imagePaths);
-
-        // 计算缓存大小
-        let totalSize = 0;
-        for (const path of imagePaths) {
-          const info = await FileSystem.getInfoAsync(path);
-          if (info.exists && info.size) {
-            totalSize += info.size;
-          }
-        }
-
-        // 格式化大小
-        if (totalSize > 1024 * 1024) {
-          setCacheSize(`${(totalSize / (1024 * 1024)).toFixed(2)} MB`);
-        } else if (totalSize > 1024) {
-          setCacheSize(`${(totalSize / 1024).toFixed(2)} KB`);
-        } else {
-          setCacheSize(`${totalSize} B`);
-        }
-      } else {
-        // 如果目录不存在，创建它
-        await FileSystem.makeDirectoryAsync(cacheDir, { intermediates: true });
-        setCachedImages([]);
-        setCacheSize("0 KB");
-      }
-    } catch (error) {
-      console.error("获取缓存信息失败", error);
-      Alert.alert("错误", "获取缓存信息失败");
-    }
-  };
-
-  // 下载图片到缓存
-  const downloadImageToCache = async () => {
-    setLoading(true);
-    try {
-      // 创建缓存目录（如果不存在）
-      const cacheDir = FileSystem.cacheDirectory + "images/";
-      const dirInfo = await FileSystem.getInfoAsync(cacheDir);
-      if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(cacheDir, { intermediates: true });
-      }
-
-      // 随机选择一张示例图片
-      const randomImage =
-        SAMPLE_IMAGES[Math.floor(Math.random() * SAMPLE_IMAGES.length)];
-      const filename = `image_${Date.now()}.jpg`;
-      const filePath = cacheDir + filename;
-
-      // 下载图片
-      await FileSystem.downloadAsync(randomImage, filePath);
-
-      Alert.alert("成功", "图片已缓存到设备");
-      // 刷新缓存信息
-      await getCacheInfo();
-    } catch (error) {
-      Alert.alert("错误", "下载图片失败: " + error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 清理缓存
-  const clearImageCache = async () => {
-    setLoading(true);
-    try {
-      const cacheDir = FileSystem.cacheDirectory + "images/";
-      await FileSystem.deleteAsync(cacheDir, { idempotent: true });
-      await FileSystem.makeDirectoryAsync(cacheDir, { intermediates: true });
-
-      setCachedImages([]);
-      setCacheSize("0 KB");
-      Alert.alert("成功", "图片缓存已清理");
-    } catch (error) {
-      Alert.alert("错误", "清理缓存失败: " + error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 初始加载缓存信息
-  useEffect(() => {
-    getCacheInfo();
-  }, []);
-
-  // 渲染缓存的图片
-  const renderCachedImage = ({ item }: { item: string }) => (
-    <View style={styles.cachedImageContainer}>
-      <Image
-        source={{ uri: item }}
-        style={styles.cachedImage}
-        resizeMode="cover"
-      />
-      <Text
-        style={[styles.imagePath, { color: colors.secondaryAccent }]}
-        numberOfLines={1}
-        ellipsizeMode="middle"
-      >
-        {item.split("/").pop()}
-      </Text>
-    </View>
-  );
-
-  return (
-    <View style={styles.exampleContainer}>
-      <View style={styles.exampleHeader}>
-        <Ionicons name="cloud-done-outline" size={20} color={colors.text} />
-        <Text style={[styles.exampleTitle, { color: colors.text }]}>
-          缓存管理示例
-        </Text>
-      </View>
-
-      <View style={[styles.exampleCard, { backgroundColor: colors.card }]}>
-        <Text
-          style={[styles.exampleDescription, { color: colors.secondaryAccent }]}
-        >
-          缓存是临时存储数据的方式，适合存储网络图片、API响应等，系统可能会在空间不足时清理。
-        </Text>
-
-        <View style={styles.cacheInfoContainer}>
-          <View style={styles.cacheInfoItem}>
-            <Text
-              style={[styles.cacheInfoLabel, { color: colors.secondaryAccent }]}
-            >
-              缓存图片数量
-            </Text>
-            <Text style={[styles.cacheInfoValue, { color: colors.text }]}>
-              {cachedImages.length} 张
-            </Text>
-          </View>
-          <View style={styles.cacheInfoItem}>
-            <Text
-              style={[styles.cacheInfoLabel, { color: colors.secondaryAccent }]}
-            >
-              缓存总大小
-            </Text>
-            <Text style={[styles.cacheInfoValue, { color: colors.text }]}>
-              {cacheSize}
-            </Text>
-          </View>
-        </View>
-
-        {cachedImages.length > 0 ? (
-          <FlatList
-            data={cachedImages}
-            renderItem={renderCachedImage}
-            keyExtractor={(item) => item}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.imageListContainer}
-          />
-        ) : (
-          <View style={styles.emptyCacheContainer}>
-            <Ionicons
-              name="images-outline"
-              size={40}
-              color={colors.secondaryAccent}
-            />
-            <Text
-              style={[styles.emptyCacheText, { color: colors.secondaryAccent }]}
-            >
-              尚无缓存图片
-            </Text>
-          </View>
-        )}
-
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.tint }]}
-            onPress={downloadImageToCache}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={styles.actionButtonText}>缓存新图片</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: "#F44336" }]}
-            onPress={clearImageCache}
-            disabled={loading || cachedImages.length === 0}
-          >
-            <Text style={styles.actionButtonText}>清理缓存</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={[styles.exampleNotes, { color: colors.secondaryAccent }]}>
-          图片缓存在 cacheDirectory/images/
-          目录中，可能在存储空间不足时被系统清理。
-        </Text>
-      </View>
-    </View>
-  );
-};
-
-// 应用场景列表
-const UseCaseList = ({
-  colors,
-  selectedId,
-  onSelect,
-}: {
-  colors: any;
-  selectedId: string;
-  onSelect: (id: string) => void;
-}) => {
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.useCaseListContainer}
-    >
-      {USE_CASES.map((useCase) => (
-        <TouchableOpacity
-          key={useCase.id}
-          style={[
-            styles.useCaseItem,
-            {
-              backgroundColor:
-                selectedId === useCase.id
-                  ? `${useCase.color}22` // 添加透明度
-                  : colors.card,
-            },
-          ]}
-          onPress={() => onSelect(useCase.id)}
-        >
-          <View
-            style={[
-              styles.useCaseIconContainer,
-              { backgroundColor: useCase.color },
-            ]}
-          >
-            <Ionicons name={useCase.icon as any} size={24} color="#FFFFFF" />
-          </View>
-          <Text
-            style={[
-              styles.useCaseTitle,
-              {
-                color: colors.text,
-                fontWeight: selectedId === useCase.id ? "700" : "400",
-              },
-            ]}
-          >
-            {useCase.title}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  );
-};
+// 文件路径常量
+const TODO_FILE = FileSystem.documentDirectory + "todos.json";
 
 // 主组件
 export default function FileSystemExample() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const router = useRouter();
-  const [selectedUseCase, setSelectedUseCase] = useState("userdata");
 
+  // 状态管理
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [newTodo, setNewTodo] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [fileStats, setFileStats] = useState({
+    fileSize: "0 KB",
+    lastModified: "-",
+    completedCount: 0,
+  });
+
+  // 加载待办事项
+  const loadTodos = async () => {
+    try {
+      // 检查文件是否存在
+      const fileInfo = await FileSystem.getInfoAsync(TODO_FILE);
+
+      if (fileInfo.exists) {
+        // 读取文件内容
+        const content = await FileSystem.readAsStringAsync(TODO_FILE);
+        const loadedTodos = JSON.parse(content);
+        setTodos(loadedTodos);
+
+        // 更新文件统计信息
+        updateFileStats(loadedTodos, fileInfo);
+      } else {
+        // 首次使用，创建示例数据
+        const initialTodos: Todo[] = [
+          {
+            id: "1",
+            title: "学习文件系统API",
+            completed: false,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: "2",
+            title: "尝试保存待办事项",
+            completed: false,
+            createdAt: new Date().toISOString(),
+          },
+        ];
+
+        setTodos(initialTodos);
+        await saveTodosToFile(initialTodos);
+      }
+    } catch (error) {
+      console.error("加载待办事项失败", error);
+      Alert.alert("错误", "无法加载待办事项列表");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 保存待办事项到文件
+  const saveTodosToFile = async (todoList: Todo[]) => {
+    try {
+      // 将数据转换为JSON字符串
+      const jsonData = JSON.stringify(todoList);
+
+      // 写入文件
+      await FileSystem.writeAsStringAsync(TODO_FILE, jsonData);
+
+      // 更新文件统计信息
+      const fileInfo = await FileSystem.getInfoAsync(TODO_FILE);
+      updateFileStats(todoList, fileInfo);
+
+      return true;
+    } catch (error) {
+      console.error("保存待办事项失败", error);
+      Alert.alert("错误", "无法保存待办事项列表");
+      return false;
+    }
+  };
+
+  // 更新文件统计信息
+  const updateFileStats = (todoList: Todo[], fileInfo: any) => {
+    // 计算文件大小
+    const size = fileInfo.size || 0;
+    const formattedSize =
+      size > 1024 ? `${(size / 1024).toFixed(2)} KB` : `${size} B`;
+
+    // 格式化最后修改时间
+    const modificationTime = fileInfo.modificationTime
+      ? new Date(fileInfo.modificationTime * 1000).toLocaleString()
+      : "-";
+
+    // 计算已完成待办数量
+    const completedCount = todoList.filter((todo) => todo.completed).length;
+
+    setFileStats({
+      fileSize: formattedSize,
+      lastModified: modificationTime,
+      completedCount,
+    });
+  };
+
+  // 添加新待办事项
+  const addTodo = async () => {
+    if (!newTodo.trim()) return;
+
+    const newItem: Todo = {
+      id: Date.now().toString(),
+      title: newTodo.trim(),
+      completed: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedTodos = [...todos, newItem];
+    setTodos(updatedTodos);
+    setNewTodo("");
+
+    await saveTodosToFile(updatedTodos);
+  };
+
+  // 切换待办事项状态
+  const toggleTodo = async (id: string) => {
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo,
+    );
+
+    setTodos(updatedTodos);
+    await saveTodosToFile(updatedTodos);
+  };
+
+  // 删除待办事项
+  const deleteTodo = async (id: string) => {
+    const updatedTodos = todos.filter((todo) => todo.id !== id);
+    setTodos(updatedTodos);
+    await saveTodosToFile(updatedTodos);
+  };
+
+  // 导出待办事项
+  const exportTodos = async () => {
+    try {
+      const backupPath =
+        FileSystem.documentDirectory + `todos_backup_${Date.now()}.json`;
+      await FileSystem.copyAsync({
+        from: TODO_FILE,
+        to: backupPath,
+      });
+
+      Alert.alert("导出成功", `待办事项已备份到:\n${backupPath}`);
+    } catch (error) {
+      console.error("导出失败", error);
+      Alert.alert("错误", "无法导出待办事项列表");
+    }
+  };
+
+  // 删除所有待办事项
+  const deleteAllTodos = async () => {
+    Alert.alert(
+      "删除所有待办事项",
+      "确定要删除所有待办事项吗？此操作不可撤销。",
+      [
+        { text: "取消", style: "cancel" },
+        {
+          text: "删除",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // 检查文件是否存在
+              const fileInfo = await FileSystem.getInfoAsync(TODO_FILE);
+
+              if (fileInfo.exists) {
+                // 删除文件
+                await FileSystem.deleteAsync(TODO_FILE);
+                // 重新创建空文件
+                await FileSystem.writeAsStringAsync(
+                  TODO_FILE,
+                  JSON.stringify([]),
+                );
+              }
+
+              // 清空待办事项列表
+              setTodos([]);
+              updateFileStats([], {
+                size: 0,
+                modificationTime: Date.now() / 1000,
+              });
+
+              Alert.alert("已删除", "所有待办事项已删除");
+            } catch (error) {
+              console.error("删除失败", error);
+              Alert.alert("错误", "无法删除待办事项");
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  // 组件加载时读取待办事项
+  useEffect(() => {
+    loadTodos();
+  }, []);
+
+  // 渲染待办事项
+  const renderTodoItem = ({ item }: { item: Todo }) => (
+    <View style={[styles.todoItem, { backgroundColor: colors.card }]}>
+      <TouchableOpacity
+        style={styles.checkbox}
+        onPress={() => toggleTodo(item.id)}
+      >
+        <Ionicons
+          name={item.completed ? "checkmark-circle" : "ellipse-outline"}
+          size={24}
+          color={item.completed ? "#4CAF50" : colors.tint}
+        />
+      </TouchableOpacity>
+
+      <View style={styles.todoContent}>
+        <Text
+          style={[
+            styles.todoTitle,
+            {
+              color: colors.text,
+              textDecorationLine: item.completed ? "line-through" : "none",
+              opacity: item.completed ? 0.6 : 1,
+            },
+          ]}
+        >
+          {item.title}
+        </Text>
+        <Text style={[styles.todoDate, { color: colors.secondaryAccent }]}>
+          {new Date(item.createdAt).toLocaleString()}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => deleteTodo(item.id)}
+      >
+        <Ionicons name="trash-outline" size={22} color="#F44336" />
+      </TouchableOpacity>
+    </View>
+  );
+
+  // 返回上一页
   const handleBack = () => {
     router.back();
   };
 
-  // 渲染选中的应用场景示例
-  const renderSelectedExample = () => {
-    switch (selectedUseCase) {
-      case "userdata":
-        return <UserDataStorageExample colors={colors} />;
-      case "cache":
-        return <CacheManagementExample colors={colors} />;
-      case "media":
-        // 这里可以实现媒体文件管理示例
-        return (
-          <View style={styles.comingSoonContainer}>
-            <Ionicons
-              name="images-outline"
-              size={48}
-              color={colors.secondaryAccent}
-            />
-            <Text style={[styles.comingSoonText, { color: colors.text }]}>
-              媒体文件管理示例
-            </Text>
-            <Text
-              style={[
-                styles.comingSoonSubtext,
-                { color: colors.secondaryAccent },
-              ]}
-            >
-              此示例将展示如何管理本地媒体文件，敬请期待！
-            </Text>
-          </View>
-        );
-      case "download":
-        // 这里可以实现文件下载与分享示例
-        return (
-          <View style={styles.comingSoonContainer}>
-            <Ionicons
-              name="download-outline"
-              size={48}
-              color={colors.secondaryAccent}
-            />
-            <Text style={[styles.comingSoonText, { color: colors.text }]}>
-              文件下载与分享示例
-            </Text>
-            <Text
-              style={[
-                styles.comingSoonSubtext,
-                { color: colors.secondaryAccent },
-              ]}
-            >
-              此示例将展示如何下载和分享文件，敬请期待！
-            </Text>
-          </View>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
+    >
+      <StatusBar
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+      />
+
+      {/* 头部导航 */}
       <View style={[styles.header, { backgroundColor: colors.background }]}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          文件系统
+          文件系统待办清单
         </Text>
         <View style={styles.headerRight} />
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <IntroductionSection colors={colors} />
-        <FileSystemDirectoriesSection colors={colors} />
+      {/* 文件信息 */}
+      <View style={[styles.infoCard, { backgroundColor: colors.card }]}>
+        <View style={styles.infoRow}>
+          <View style={styles.infoItem}>
+            <Text style={[styles.infoLabel, { color: colors.secondaryAccent }]}>
+              文件大小
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.text }]}>
+              {fileStats.fileSize}
+            </Text>
+          </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            实际应用场景
-          </Text>
-          <Text
-            style={[
-              styles.sectionDescription,
-              { color: colors.secondaryAccent },
-            ]}
-          >
-            选择一个场景，查看文件系统的典型应用：
-          </Text>
+          <View style={styles.infoItem}>
+            <Text style={[styles.infoLabel, { color: colors.secondaryAccent }]}>
+              最后修改
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.text }]}>
+              {fileStats.lastModified}
+            </Text>
+          </View>
 
-          <UseCaseList
-            colors={colors}
-            selectedId={selectedUseCase}
-            onSelect={setSelectedUseCase}
-          />
-
-          {renderSelectedExample()}
+          <View style={styles.infoItem}>
+            <Text style={[styles.infoLabel, { color: colors.secondaryAccent }]}>
+              已完成
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.text }]}>
+              {fileStats.completedCount}/{todos.length}
+            </Text>
+          </View>
         </View>
-      </ScrollView>
-    </View>
+
+        <Text style={[styles.filePath, { color: colors.secondaryAccent }]}>
+          存储路径: {TODO_FILE}
+        </Text>
+      </View>
+
+      {/* 输入框 */}
+      <View style={[styles.inputContainer, { backgroundColor: colors.card }]}>
+        <TextInput
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.border },
+          ]}
+          placeholder="添加新待办事项..."
+          placeholderTextColor={colors.secondaryAccent}
+          value={newTodo}
+          onChangeText={setNewTodo}
+          onSubmitEditing={addTodo}
+        />
+        <TouchableOpacity
+          style={[styles.addButton, { backgroundColor: colors.tint }]}
+          onPress={addTodo}
+        >
+          <Ionicons name="add" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* 待办事项列表 */}
+      <View style={styles.listContainer}>
+        <View style={styles.listHeader}>
+          <Text style={[styles.listTitle, { color: colors.text }]}>
+            待办事项列表
+          </Text>
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, { borderColor: colors.tint }]}
+              onPress={exportTodos}
+            >
+              <Ionicons name="download-outline" size={18} color={colors.tint} />
+              <Text style={[styles.actionButtonText, { color: colors.tint }]}>
+                导出
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, { borderColor: "#F44336" }]}
+              onPress={deleteAllTodos}
+            >
+              <Ionicons name="trash-outline" size={18} color="#F44336" />
+              <Text style={[styles.actionButtonText, { color: "#F44336" }]}>
+                清空
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {loading ? (
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" color={colors.tint} />
+            <Text
+              style={[styles.loadingText, { color: colors.secondaryAccent }]}
+            >
+              正在读取待办事项...
+            </Text>
+          </View>
+        ) : todos.length === 0 ? (
+          <View style={styles.centerContent}>
+            <Ionicons name="list" size={64} color={colors.secondaryAccent} />
+            <Text style={[styles.emptyText, { color: colors.text }]}>
+              暂无待办事项
+            </Text>
+            <Text
+              style={[styles.emptySubtext, { color: colors.secondaryAccent }]}
+            >
+              添加一些待办事项来体验文件系统存储功能
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={todos}
+            renderItem={renderTodoItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
+      </View>
+
+      {/* 文件系统说明 */}
+      <View style={[styles.footer, { backgroundColor: colors.card }]}>
+        <Text style={[styles.footerTitle, { color: colors.text }]}>
+          文件系统功能展示
+        </Text>
+        <View style={styles.featureList}>
+          <View style={styles.featureItem}>
+            <Ionicons
+              name="document-text-outline"
+              size={18}
+              color={colors.tint}
+            />
+            <Text
+              style={[styles.featureText, { color: colors.secondaryAccent }]}
+            >
+              JSON格式存储
+            </Text>
+          </View>
+          <View style={styles.featureItem}>
+            <Ionicons name="save-outline" size={18} color={colors.tint} />
+            <Text
+              style={[styles.featureText, { color: colors.secondaryAccent }]}
+            >
+              自动持久化
+            </Text>
+          </View>
+          <View style={styles.featureItem}>
+            <Ionicons name="folder-outline" size={18} color={colors.tint} />
+            <Text
+              style={[styles.featureText, { color: colors.secondaryAccent }]}
+            >
+              文件备份
+            </Text>
+          </View>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -743,42 +463,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: Platform.OS === "ios" ? 48 : 16,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "600",
   },
   headerRight: {
     width: 40,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 12,
-  },
-  sectionDescription: {
-    fontSize: 14,
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  card: {
+  infoCard: {
+    margin: 16,
+    marginTop: 8,
     borderRadius: 12,
     padding: 16,
     ...Platform.select({
@@ -793,249 +493,185 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  normalText: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  bulletContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  bulletText: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginLeft: 8,
-    flex: 1,
-  },
-  // 目录类型样式
-  directoriesContainer: {
+  infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  directoryCard: {
-    flex: 0.48,
-    borderRadius: 12,
-    padding: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  directoryIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  infoItem: {
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
+    flex: 1,
   },
-  directoryTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 6,
-  },
-  directoryDescription: {
+  infoLabel: {
     fontSize: 12,
-    lineHeight: 16,
-    marginBottom: 8,
-  },
-  codeText: {
-    fontSize: 10,
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    marginBottom: 8,
-  },
-  usageTagContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  usageTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginRight: 4,
     marginBottom: 4,
   },
-  usageTagText: {
+  infoValue: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  filePath: {
     fontSize: 10,
-    fontWeight: "500",
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    marginTop: 12,
+    textAlign: "center",
   },
-  // 用例列表样式
-  useCaseListContainer: {
-    paddingBottom: 8,
-  },
-  useCaseItem: {
-    padding: 12,
-    marginRight: 12,
-    borderRadius: 12,
+  inputContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    minWidth: 100,
+    marginHorizontal: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowRadius: 3,
       },
       android: {
         elevation: 2,
       },
     }),
   },
-  useCaseIconContainer: {
+  input: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    fontSize: 15,
+  },
+  addButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
-  },
-  useCaseTitle: {
-    fontSize: 12,
-    textAlign: "center",
-  },
-  // 示例组件样式
-  exampleContainer: {
-    marginTop: 16,
-  },
-  exampleHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  exampleTitle: {
-    fontSize: 16,
-    fontWeight: "600",
     marginLeft: 8,
   },
-  exampleCard: {
-    borderRadius: 12,
+  listContainer: {
+    flex: 1,
+    marginHorizontal: 16,
+  },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 12,
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  actionButtons: {
+    flexDirection: "row",
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginLeft: 8,
+  },
+  actionButtonText: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginLeft: 4,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     padding: 16,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+  },
+  emptyText: {
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  emptySubtext: {
+    marginTop: 8,
+    fontSize: 14,
+    textAlign: "center",
+    maxWidth: "80%",
+  },
+  listContent: {
+    paddingBottom: 16,
+  },
+  todoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    padding: 12,
+    borderRadius: 12,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowRadius: 2,
       },
       android: {
-        elevation: 3,
+        elevation: 2,
       },
     }),
   },
-  exampleDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 16,
+  checkbox: {
+    marginRight: 12,
   },
-  exampleNotes: {
-    fontSize: 12,
-    fontStyle: "italic",
-    marginTop: 12,
-  },
-  // 用户数据存储示例样式
-  settingsContainer: {
-    marginBottom: 16,
-  },
-  settingRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
-  },
-  settingLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  settingValue: {
-    fontSize: 12,
-  },
-  actionsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  actionButton: {
-    flex: 0.31,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "500",
-    fontSize: 12,
-  },
-  // 缓存管理示例样式
-  cacheInfoContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  cacheInfoItem: {
-    alignItems: "center",
+  todoContent: {
     flex: 1,
   },
-  cacheInfoLabel: {
+  todoTitle: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  todoDate: {
     fontSize: 12,
-    marginBottom: 4,
   },
-  cacheInfoValue: {
-    fontSize: 16,
-    fontWeight: "bold",
+  deleteButton: {
+    padding: 8,
   },
-  imageListContainer: {
-    paddingVertical: 8,
+  footer: {
+    padding: 16,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
-  cachedImageContainer: {
-    marginRight: 12,
-    alignItems: "center",
-  },
-  cachedImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  imagePath: {
-    fontSize: 10,
-    width: 80,
-    textAlign: "center",
-  },
-  emptyCacheContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 24,
-  },
-  emptyCacheText: {
-    marginTop: 8,
+  footerTitle: {
     fontSize: 14,
-  },
-  // 敬请期待样式
-  comingSoonContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 32,
-  },
-  comingSoonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 12,
+    fontWeight: "600",
     marginBottom: 8,
-  },
-  comingSoonSubtext: {
-    fontSize: 14,
     textAlign: "center",
-    lineHeight: 20,
+  },
+  featureList: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 4,
+  },
+  featureItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  featureText: {
+    fontSize: 12,
+    marginLeft: 4,
   },
 });

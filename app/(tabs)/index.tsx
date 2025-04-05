@@ -44,13 +44,6 @@ const API_EXAMPLES = [
     color: "#FF9800",
   },
   {
-    id: "haptics",
-    title: "Haptics",
-    icon: "phone-portrait-outline",
-    description: "触觉反馈示例",
-    color: "#4FC3F7",
-  },
-  {
     id: "imagePicker",
     title: "Image Picker",
     icon: "image-outline",
@@ -110,8 +103,6 @@ const ExampleCard = ({ item, index }: { item: ExampleItem; index: number }) => {
         router.push("/(examples)/image");
       } else if (item.id === "file-system") {
         router.push("/(examples)/file-system");
-      } else if (item.id === "haptics") {
-        router.push("/(examples)/haptics");
       } else if (item.id === "imagePicker") {
         router.push("/(examples)/image-picker");
       } else {

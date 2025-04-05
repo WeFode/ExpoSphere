@@ -5,9 +5,11 @@ import { StyleSheet, ViewStyle } from "react-native";
 import { useMemo } from "react";
 import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
+import { useI18n } from "@/i18n";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { t } = useI18n();
 
   const tabBarStyle = useMemo<ViewStyle>(
     () => ({
@@ -44,7 +46,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "示例库",
+          title: t("tabs.home"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="cube-outline" size={size} color={color} />
           ),
@@ -54,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "个人中心",
+          title: t("tabs.profile"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),

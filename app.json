@@ -1,49 +1,44 @@
 {
   "expo": {
-    "name": "ExpoSphere",
-    "slug": "rn_expo_pj",
+    "name": "boxAI",
+    "slug": "boxAI",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/images/logo.png",
+    "scheme": "boxAI",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#111827"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon.png",
-        "backgroundColor": "#111827"
+        "foregroundImage": "./assets/images/android-icon.png",
+        "backgroundColor": "#333333"
       }
     },
     "web": {
-      "favicon": "./assets/logo.png"
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/logo.png"
     },
     "plugins": [
+      "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#111827",
-          "image": "./assets/logo.png",
-          "imageResizeMode": "contain",
-          "dark": {
-            "backgroundColor": "#111827",
-            "image": "./assets/logo.png"
-          }
+          "image": "./assets/images/logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#333333"
         }
       ],
-      [
-        "expo-video",
-        {
-          "supportsBackgroundPlayback": true,
-          "supportsPictureInPicture": true
-        }
-      ]
-    ]
+      "expo-video",
+      "expo-font",
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

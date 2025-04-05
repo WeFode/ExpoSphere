@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,8 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { useI18n } from "@/i18n";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 // 用户数据
 const USER_DATA = {
@@ -55,199 +57,49 @@ const SETTINGS = [
   },
 ];
 
-// 模拟收藏品数据
-const COLLECTIONS = [
+// 用于存储国际化后的设置项
+const getSettings = (t: any) => [
   {
-    id: "coll-1",
-    name: "我的创作",
-    items: 47,
-    thumbnail: "https://picsum.photos/150/150?random=10",
+    id: "theme",
+    title: t("profile.settings.theme"),
+    icon: "color-palette-outline",
+    color: "#9C27B0",
   },
   {
-    id: "coll-2",
-    name: "收藏品",
-    items: 128,
-    thumbnail: "https://picsum.photos/150/150?random=11",
+    id: "language",
+    title: t("profile.settings.language"),
+    icon: "language-outline",
+    color: "#2196F3",
   },
   {
-    id: "coll-3",
-    name: "喜欢的",
-    items: 215,
-    thumbnail: "https://picsum.photos/150/150?random=12",
-  },
-];
-
-// 模拟活动数据
-const ACTIVITIES = [
-  {
-    id: "act-1",
-    type: "purchase",
-    title: "你购买了 Crypto Punk #5123",
-    time: "2小时前",
-    icon: "cart-outline",
+    id: "notifications",
+    title: t("profile.settings.notifications"),
+    icon: "notifications-outline",
+    color: "#FF9800",
   },
   {
-    id: "act-2",
-    type: "sale",
-    title: "你的 Bored Ape #3211 已售出",
-    time: "昨天",
-    icon: "cash-outline",
-  },
-  {
-    id: "act-3",
-    type: "mint",
-    title: "你铸造了新的 NFT",
-    time: "2天前",
-    icon: "create-outline",
-  },
-  {
-    id: "act-4",
-    type: "bid",
-    title: "有人对你的 CryptoPunk #7804 出价",
-    time: "3天前",
-    icon: "trending-up-outline",
+    id: "about",
+    title: t("profile.settings.about"),
+    icon: "information-circle-outline",
+    color: "#4CAF50",
   },
 ];
-
-const ProfileStat = ({ label, value }: { label: string; value: number }) => {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "dark"];
-
-  return (
-    <View style={styles.statItem}>
-      <Text style={[styles.statValue, { color: colors.text }]}>
-        {value.toLocaleString()}
-      </Text>
-      <Text style={[styles.statLabel, { color: colors.secondaryAccent }]}>
-        {label}
-      </Text>
-    </View>
-  );
-};
-
-const CollectionCard = ({
-  item,
-  index,
-}: {
-  item: (typeof COLLECTIONS)[0];
-  index: number;
-}) => {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "dark"];
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.96);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
-
-  return (
-    <Animated.View
-      entering={SlideInRight.delay(index * 200).springify()}
-      style={styles.collectionCardContainer}
-    >
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-      >
-        <Animated.View
-          style={[
-            styles.collectionCard,
-            { backgroundColor: colors.card },
-            animatedStyle,
-          ]}
-        >
-          <Image
-            source={{ uri: item.thumbnail }}
-            style={styles.collectionImage}
-            contentFit="cover"
-            transition={200}
-          />
-          <BlurView
-            tint={colorScheme === "dark" ? "dark" : "light"}
-            intensity={80}
-            style={styles.collectionInfo}
-          >
-            <Text
-              style={[styles.collectionName, { color: colors.text }]}
-              numberOfLines={1}
-            >
-              {item.name}
-            </Text>
-            <Text
-              style={[
-                styles.collectionItems,
-                { color: colors.secondaryAccent },
-              ]}
-            >
-              {item.items} 项目
-            </Text>
-          </BlurView>
-        </Animated.View>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-const ActivityItem = ({
-  item,
-  index,
-}: {
-  item: (typeof ACTIVITIES)[0];
-  index: number;
-}) => {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "dark"];
-
-  return (
-    <Animated.View
-      entering={FadeIn.delay(index * 100)}
-      style={[styles.activityItem, { borderBottomColor: colors.border }]}
-    >
-      <View
-        style={[styles.activityIconContainer, { backgroundColor: colors.card }]}
-      >
-        <Ionicons
-          name={item.icon as any}
-          size={18}
-          color={colors.primaryAccent}
-        />
-      </View>
-      <View style={styles.activityContent}>
-        <Text style={[styles.activityTitle, { color: colors.text }]}>
-          {item.title}
-        </Text>
-        <Text style={[styles.activityTime, { color: colors.secondaryAccent }]}>
-          {item.time}
-        </Text>
-      </View>
-      <Ionicons
-        name="chevron-forward"
-        size={18}
-        color={colors.secondaryAccent}
-      />
-    </Animated.View>
-  );
-};
 
 // 设置项组件
-const SettingItem = ({ item }: { item: (typeof SETTINGS)[0] }) => {
+const SettingItem = ({
+  item,
+  onPress,
+}: {
+  item: (typeof SETTINGS)[0];
+  onPress?: () => void;
+}) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
 
   return (
     <TouchableOpacity
       style={[styles.settingItem, { borderBottomColor: colors.border }]}
+      onPress={onPress}
     >
       <View
         style={[styles.settingIconContainer, { backgroundColor: item.color }]}
@@ -269,6 +121,18 @@ const SettingItem = ({ item }: { item: (typeof SETTINGS)[0] }) => {
 export default function Profile() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
+  const { t, locale } = useI18n();
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+
+  // 获取国际化后的设置项
+  const localizedSettings = getSettings(t);
+
+  // 处理设置项点击
+  const handleSettingPress = (id: string) => {
+    if (id === "language") {
+      setLanguageModalVisible(true);
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -288,13 +152,13 @@ export default function Profile() {
             transition={300}
           />
           <Text style={[styles.name, { color: colors.text }]}>
-            {USER_DATA.name}
+            {t("profile.name")}
           </Text>
           <Text style={[styles.username, { color: colors.secondaryAccent }]}>
-            {USER_DATA.username}
+            {t("profile.username")}
           </Text>
           <Text style={[styles.bio, { color: colors.text }]}>
-            {USER_DATA.bio}
+            {t("profile.bio")}
           </Text>
         </Animated.View>
 
@@ -303,7 +167,7 @@ export default function Profile() {
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: colors.text }]}>28</Text>
             <Text style={[styles.statLabel, { color: colors.secondaryAccent }]}>
-              已测试API
+              {t("profile.stats.testedApis")}
             </Text>
           </View>
           <View
@@ -312,7 +176,7 @@ export default function Profile() {
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: colors.text }]}>15</Text>
             <Text style={[styles.statLabel, { color: colors.secondaryAccent }]}>
-              收藏示例
+              {t("profile.stats.savedExamples")}
             </Text>
           </View>
           <View
@@ -321,7 +185,7 @@ export default function Profile() {
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: colors.text }]}>3</Text>
             <Text style={[styles.statLabel, { color: colors.secondaryAccent }]}>
-              自建项目
+              {t("profile.stats.ownProjects")}
             </Text>
           </View>
         </View>
@@ -329,11 +193,15 @@ export default function Profile() {
         {/* 设置列表 */}
         <View style={styles.settingsContainer}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            设置
+            {t("profile.settings.title")}
           </Text>
           <View style={[styles.settingsList, { backgroundColor: colors.card }]}>
-            {SETTINGS.map((item) => (
-              <SettingItem key={item.id} item={item} />
+            {localizedSettings.map((item) => (
+              <SettingItem
+                key={item.id}
+                item={item}
+                onPress={() => handleSettingPress(item.id)}
+              />
             ))}
           </View>
         </View>
@@ -344,10 +212,17 @@ export default function Profile() {
         >
           <Ionicons name="log-out-outline" size={20} color="#FF5252" />
           <Text style={[styles.logoutText, { color: "#FF5252" }]}>
-            退出登录
+            {t("profile.logout")}
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* 语言切换器 */}
+      <LanguageSwitcher
+        visible={languageModalVisible}
+        onClose={() => setLanguageModalVisible(false)}
+        colors={colors}
+      />
     </View>
   );
 }

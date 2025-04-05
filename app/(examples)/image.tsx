@@ -11,19 +11,14 @@ import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import {
-  Image,
-  ImageContentFit,
-  ImageContentPosition,
-  ImageTransition,
-} from "expo-image";
+import { Image, ImageContentFit, ImageTransition } from "expo-image";
 import { BlurView } from "expo-blur";
 
 import { ActivityIndicator } from "react-native";
 
 // 示例图片
 const SAMPLE_IMAGE_URL =
-  "https://images.unsplash.com/photo-1709726186959-3e7bfd21a771?q=80&w=2070";
+  "https://images.unsplash.com/photo-1599420186946-7b6fb4e297f0?q=80&w=2070";
 const SAMPLE_IMAGES = [
   "https://images.unsplash.com/photo-1599420186946-7b6fb4e297f0?q=80&w=1287",
   "https://images.unsplash.com/photo-1481349518771-20055b2a7b24?q=80&w=1439",
@@ -43,18 +38,7 @@ const contentFitOptions: ImageContentFit[] = [
   "none",
   "scale-down",
 ];
-const contentPositionOptions: ImageContentPosition[] = [
-  "center",
-  "top",
-  "bottom",
-  "left",
-  "right",
-  "top left",
-  "top right",
-  "bottom left",
-  "bottom right",
-];
-const cachePolicyOptions = ["none", "disk", "memory", "memory-disk"];
+
 const transitionEffects: ImageTransition["effect"][] = [
   "cross-dissolve",
   "flip-from-left",
@@ -108,58 +92,6 @@ const ContentFitExample = ({ colors }: { colors: any }) => {
           </View>
         ))}
       </ScrollView>
-    </View>
-  );
-};
-
-// 示例组件：内容位置
-const ContentPositionExample = ({ colors }: { colors: any }) => {
-  const [position, setPosition] = useState<ImageContentPosition>("center");
-
-  return (
-    <View style={styles.sectionContainer}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        内容位置 (contentPosition)
-      </Text>
-      <View style={styles.positionContainer}>
-        <Image
-          source={SAMPLE_IMAGES[1]}
-          style={styles.positionImage}
-          contentFit="none"
-          contentPosition={position}
-        />
-        <View style={styles.positionGrid}>
-          {[
-            "top left",
-            "top",
-            "top right",
-            "left",
-            "center",
-            "right",
-            "bottom left",
-            "bottom",
-            "bottom right",
-          ].map((pos) => (
-            <TouchableOpacity
-              key={pos}
-              style={[
-                styles.positionButton,
-                position === pos && { backgroundColor: colors.tint },
-              ]}
-              onPress={() => setPosition(pos as ImageContentPosition)}
-            >
-              <Text
-                style={[
-                  styles.positionButtonText,
-                  position === pos && { color: "#FFFFFF" },
-                ]}
-              >
-                {pos}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
     </View>
   );
 };
@@ -333,7 +265,6 @@ export default function ImageExample() {
         </View>
 
         <ContentFitExample colors={colors} />
-        <ContentPositionExample colors={colors} />
         <PlaceholderExample colors={colors} />
         <TransitionExample colors={colors} />
         <BackgroundExample colors={colors} />
@@ -556,10 +487,11 @@ const styles = StyleSheet.create({
     }),
   },
   positionImage: {
-    width: 150,
-    height: 150,
+    width: 180,
+    height: 180,
     backgroundColor: "#333",
     borderRadius: 8,
+    overflow: "hidden",
   },
   positionGrid: {
     flex: 1,
@@ -575,8 +507,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 4,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: 32,
   },
   positionButtonText: {
-    fontSize: 10,
+    fontSize: 12,
+    fontWeight: "500",
   },
 });

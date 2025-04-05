@@ -35,12 +35,7 @@ type ListItem = {
 };
 
 // 右侧操作按钮
-const renderRightActions = (
-  progress: any,
-  dragX: any,
-  onDelete: () => void,
-  colors: any,
-) => {
+const renderRightActions = (onDelete: () => void) => {
   return (
     <View style={styles.rightActions}>
       <RectButton style={[styles.deleteButton]} onPress={onDelete}>
@@ -82,9 +77,7 @@ const ListItemCard = ({
         friction={2}
         leftThreshold={80}
         rightThreshold={40}
-        renderRightActions={(progress, dragX) =>
-          renderRightActions(progress, dragX, handleDelete, colors)
-        }
+        renderRightActions={() => renderRightActions(handleDelete)}
       >
         <View style={[styles.itemContainer, { backgroundColor: colors.card }]}>
           <View style={styles.itemContent}>

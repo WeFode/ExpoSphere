@@ -1,7 +1,8 @@
 {
-  "name": "rn_expo_pj",
+  "name": "expo-sphere",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "description": "Explore the world of React Native + Expo development with integrated API examples and components",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",

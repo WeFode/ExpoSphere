@@ -2,17 +2,6 @@
 
 ExpoSphere is a thoughtfully designed open-source application example built with React Native and Expo, aimed at providing developers with comprehensive API integration guides and practical component showcases.
 
-## 🌟 GitHub Project Description
-
-```
-ExpoSphere: An API and component integration treasure trove for React Native developers, offering rich examples and best practices to help you quickly build high-quality Expo applications.
-```
-
-Short version:
-```
-A sample project integrating common React Native and Expo APIs, providing practical components and best practices for rapid development of quality applications
-```
-
 ## 📱 Project Features
 
 - **Rich API Examples**: Integrates various common Expo and React Native APIs, including FlashList, Camera, Location, and more
@@ -43,14 +32,14 @@ A sample project integrating common React Native and Expo APIs, providing practi
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ExpoSphere.git
+git clone https://github.com/WeFode/ExpoSphere.git
 
 # Install dependencies
 cd ExpoSphere
 npm install
 
 # Start the development server
-npm start
+npm run start
 ```
 
 ## 📚 Provided Examples

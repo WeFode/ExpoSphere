@@ -34,7 +34,6 @@ const ExampleCard = ({ item, index }: { item: ExampleItem; index: number }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const router = useRouter();
-  const { t } = useI18n();
 
   const handlePress = useCallback(
     (id: string) => {
@@ -54,8 +53,8 @@ const ExampleCard = ({ item, index }: { item: ExampleItem; index: number }) => {
         router.push("/(examples)/blur-view" as any);
       } else if (item.id === "camera") {
         router.push("/(examples)/camera" as any);
-      } else if (item.id === "location") {
-        router.push("/(examples)/location" as any);
+      } else if (item.id === "captureRef") {
+        router.push("/(examples)/capture-ref" as any);
       }
     },
     [router, item.id],
@@ -190,11 +189,11 @@ export default function ExampleLibrary() {
       color: "#FF8A65",
     },
     {
-      id: "location",
-      title: t("home.examples.location.title"),
-      icon: "location-outline",
-      description: t("home.examples.location.description"),
-      color: "#7986CB",
+      id: "captureRef",
+      title: t("home.examples.captureRef.title"),
+      icon: "logo-capacitor",
+      description: t("home.examples.captureRef.description"),
+      color: "#c3c3c3",
     },
   ];
 

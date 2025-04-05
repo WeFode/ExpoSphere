@@ -21,44 +21,47 @@ import {
   LivePhotoAsset,
 } from "expo-live-photo";
 import { VideoView, useVideoPlayer } from "expo-video";
+import { useI18n } from "@/i18n";
 
 // 介绍区域组件
 const IntroductionSection = ({ colors }: { colors: any }) => {
+  const { t } = useI18n();
+
   return (
     <View style={styles.section}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        图片选择器
+        {t("imagePicker.title")}
       </Text>
       <View style={[styles.card, { backgroundColor: colors.card }]}>
         <Text style={[styles.normalText, { color: colors.text }]}>
-          图片选择器允许用户从设备相册中选择图片或视频，或直接使用相机拍摄新照片。
+          {t("imagePicker.info")}
         </Text>
 
         <View style={styles.bulletContainer}>
           <Ionicons name="checkmark-circle" size={18} color={colors.tint} />
           <Text style={[styles.bulletText, { color: colors.text }]}>
-            选择单张或多张图片
+            {t("imagePicker.intro.feature1")}
           </Text>
         </View>
 
         <View style={styles.bulletContainer}>
           <Ionicons name="checkmark-circle" size={18} color={colors.tint} />
           <Text style={[styles.bulletText, { color: colors.text }]}>
-            拍摄新照片
+            {t("imagePicker.intro.feature2")}
           </Text>
         </View>
 
         <View style={styles.bulletContainer}>
           <Ionicons name="checkmark-circle" size={18} color={colors.tint} />
           <Text style={[styles.bulletText, { color: colors.text }]}>
-            支持iOS的Live Photo (活照片)
+            {t("imagePicker.intro.feature3")}
           </Text>
         </View>
 
         <View style={styles.divider} />
 
         <Text style={[styles.noteText, { color: colors.secondaryAccent }]}>
-          注意：该组件需要获取相机和媒体库权限才能正常使用。
+          {t("imagePicker.actions.permissionRequired")}
         </Text>
       </View>
     </View>
@@ -67,6 +70,7 @@ const IntroductionSection = ({ colors }: { colors: any }) => {
 
 // 图片选择和预览区域
 const ImagePickerSection = ({ colors }: { colors: any }) => {
+  const { t } = useI18n();
   const [image, setImage] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<
     "image" | "video" | "livePhoto" | null
@@ -138,8 +142,8 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
         }
       }
     } catch (error) {
-      console.log("选择图片错误:", error);
-      Alert.alert("错误", "选择图片时发生错误");
+      console.log(t("imagePicker.errors.failed") + ":", error);
+      Alert.alert(t("common.error"), t("imagePicker.errors.failed"));
     } finally {
       setLoading(false);
     }
@@ -153,7 +157,10 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
       const cameraPermission =
         await ImagePicker.requestCameraPermissionsAsync();
       if (cameraPermission.status !== "granted") {
-        Alert.alert("权限错误", "需要相机权限才能拍照");
+        Alert.alert(
+          t("common.error"),
+          t("imagePicker.actions.permissionRequired"),
+        );
         setLoading(false);
         return;
       }
@@ -192,8 +199,8 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
         }
       }
     } catch (error) {
-      console.log("拍照错误:", error);
-      Alert.alert("错误", "拍照时发生错误");
+      console.log(t("imagePicker.errors.failed") + ":", error);
+      Alert.alert(t("common.error"), t("imagePicker.errors.failed"));
     } finally {
       setLoading(false);
     }
@@ -216,7 +223,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
               { color: colors.secondaryAccent },
             ]}
           >
-            未选择图片
+            {t("imagePicker.actions.noImageSelected")}
           </Text>
         </View>
       );
@@ -232,7 +239,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
         >
           <ActivityIndicator size="large" color={colors.tint} />
           <Text style={[styles.loadingText, { color: colors.secondaryAccent }]}>
-            正在处理...
+            {t("captureRef.processing")}
           </Text>
         </View>
       );
@@ -250,7 +257,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
           <View style={styles.mediaInfo}>
             <Ionicons name="videocam" size={20} color={colors.tint} />
             <Text style={[styles.mediaInfoText, { color: colors.text }]}>
-              视频
+              {t("camera.controls.mode")}
             </Text>
           </View>
         </View>
@@ -293,7 +300,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
                 ]}
                 onPress={() => livePhotoViewRef.current?.startPlayback("hint")}
               >
-                <Text style={styles.buttonText}>预览</Text>
+                <Text style={styles.buttonText}>{t("camera.preview")}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -303,7 +310,9 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
                 ]}
                 onPress={() => livePhotoViewRef.current?.startPlayback("full")}
               >
-                <Text style={styles.buttonText}>播放</Text>
+                <Text style={styles.buttonText}>
+                  {t("animation.playAnimation")}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -313,7 +322,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
                 ]}
                 onPress={() => livePhotoViewRef.current?.stopPlayback()}
               >
-                <Text style={styles.buttonText}>停止</Text>
+                <Text style={styles.buttonText}>{t("common.cancel")}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -331,7 +340,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
         <View style={styles.mediaInfo}>
           <Ionicons name="image" size={20} color={colors.tint} />
           <Text style={[styles.mediaInfoText, { color: colors.text }]}>
-            图片
+            {t("imagePicker.results.selected")}
           </Text>
         </View>
       </View>
@@ -342,7 +351,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
     return (
       <View style={[styles.section, styles.permissionContainer]}>
         <Text style={[styles.permissionText, { color: colors.text }]}>
-          需要相机和媒体库权限才能使用此功能
+          {t("imagePicker.actions.permissionRequired")}
         </Text>
         <TouchableOpacity
           style={[styles.permissionButton, { backgroundColor: colors.tint }]}
@@ -360,7 +369,9 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
             );
           }}
         >
-          <Text style={styles.buttonText}>请求权限</Text>
+          <Text style={styles.buttonText}>
+            {t("imagePicker.actions.requestPermission")}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -369,7 +380,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.section}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        选择或拍摄图片
+        {t("imagePicker.actions.selectImage")}
       </Text>
 
       {renderPreview()}
@@ -388,7 +399,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
             <Ionicons name="images" size={24} color="#FFFFFF" />
           </View>
           <Text style={[styles.pickerButtonText, { color: colors.text }]}>
-            从相册选择
+            {t("imagePicker.actions.selectImage")}
           </Text>
         </TouchableOpacity>
 
@@ -405,7 +416,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
             <Ionicons name="camera" size={24} color="#FFFFFF" />
           </View>
           <Text style={[styles.pickerButtonText, { color: colors.text }]}>
-            拍摄照片
+            {t("imagePicker.actions.takePhoto")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -415,7 +426,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
           <View style={styles.livePhotoHeader}>
             <Ionicons name="information-circle" size={24} color={colors.tint} />
             <Text style={[styles.livePhotoTitle, { color: colors.text }]}>
-              Live Photo 信息
+              Live Photo {t("common.info")}
             </Text>
           </View>
 
@@ -426,7 +437,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
             ]}
           >
             Live Photo
-            是iOS设备上的一种特殊照片格式，它不仅包含静态图像，还包含拍摄前后1.5秒的视频。
+            {t("imagePicker.intro.feature5")}
           </Text>
 
           <View style={styles.bulletContainer}>
@@ -434,7 +445,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
             <Text
               style={[styles.bulletText, { color: colors.text, fontSize: 13 }]}
             >
-              点击预览按钮可以查看短暂的动态效果
+              {t("imagePicker.intro.feature4")}
             </Text>
           </View>
 
@@ -443,7 +454,7 @@ const ImagePickerSection = ({ colors }: { colors: any }) => {
             <Text
               style={[styles.bulletText, { color: colors.text, fontSize: 13 }]}
             >
-              点击播放按钮可以查看完整的动态效果
+              {t("imagePicker.intro.feature3")}
             </Text>
           </View>
         </View>
@@ -457,6 +468,7 @@ export default function ImagePickerExample() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const router = useRouter();
+  const { t } = useI18n();
 
   const handleBack = () => {
     router.back();
@@ -464,12 +476,20 @@ export default function ImagePickerExample() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.borderBottom,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          图片选择器
+          {t("imagePicker.title")}
         </Text>
         <View style={styles.headerRight} />
       </View>
@@ -498,7 +518,6 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
   },
   backButton: {
     padding: 8,

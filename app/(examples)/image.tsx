@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Image, ImageContentFit, ImageTransition } from "expo-image";
 import { BlurView } from "expo-blur";
+import { useI18n } from "@/i18n";
 
 import { ActivityIndicator } from "react-native";
 
@@ -66,11 +67,11 @@ const backgroundColors = [
 ];
 
 // 示例组件：内容适配模式
-const ContentFitExample = ({ colors }: { colors: any }) => {
+const ContentFitExample = ({ colors, t }: { colors: any; t: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        内容适配模式 (contentFit)
+        {t("image.contentFit.title")}
       </Text>
       <ScrollView
         horizontal
@@ -87,7 +88,9 @@ const ContentFitExample = ({ colors }: { colors: any }) => {
               transition={500}
             />
             <Text style={[styles.contentFitLabel, { color: colors.text }]}>
-              {fit}
+              {t(
+                `image.contentFit.${fit === "scale-down" ? "scaleDown" : fit}`,
+              )}
             </Text>
           </View>
         ))}
@@ -97,7 +100,7 @@ const ContentFitExample = ({ colors }: { colors: any }) => {
 };
 
 // 示例组件：占位符效果
-const PlaceholderExample = ({ colors }: { colors: any }) => {
+const PlaceholderExample = ({ colors, t }: { colors: any; t: any }) => {
   const [loaded, setLoaded] = useState(false);
   const [imageKey, setImageKey] = useState(0);
 
@@ -110,7 +113,7 @@ const PlaceholderExample = ({ colors }: { colors: any }) => {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          占位符效果 (blurhash)
+          {t("image.placeholder.title")}
         </Text>
         <TouchableOpacity onPress={reloadImage} style={styles.reloadButton}>
           <Ionicons name="refresh" size={20} color={colors.tint} />
@@ -135,7 +138,7 @@ const PlaceholderExample = ({ colors }: { colors: any }) => {
         >
           <ActivityIndicator color={colors.tint} size="large" />
           <Text style={[styles.loadingText, { color: colors.text }]}>
-            加载中...
+            {t("image.placeholder.loading")}
           </Text>
         </BlurView>
       </View>
@@ -144,7 +147,7 @@ const PlaceholderExample = ({ colors }: { colors: any }) => {
 };
 
 // 示例组件：过渡效果
-const TransitionExample = ({ colors }: { colors: any }) => {
+const TransitionExample = ({ colors, t }: { colors: any; t: any }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [transitionEffect, setTransitionEffect] =
     useState<ImageTransition["effect"]>("cross-dissolve");
@@ -162,7 +165,7 @@ const TransitionExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        过渡效果 (transition)
+        {t("image.transition.title")}
       </Text>
       <View style={styles.transitionContainer}>
         <TouchableOpacity onPress={nextImage} activeOpacity={0.8}>
@@ -178,13 +181,15 @@ const TransitionExample = ({ colors }: { colors: any }) => {
         </TouchableOpacity>
         <View style={styles.transitionControls}>
           <Text style={[styles.controlText, { color: colors.text }]}>
-            点击图片切换 | 当前效果: {transitionEffect}
+            {t("image.transition.tapToChange")} {transitionEffect}
           </Text>
           <TouchableOpacity
             style={[styles.controlButton, { backgroundColor: colors.tint }]}
             onPress={nextEffect}
           >
-            <Text style={styles.controlButtonText}>切换效果</Text>
+            <Text style={styles.controlButtonText}>
+              {t("image.transition.switchEffect")}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -193,13 +198,13 @@ const TransitionExample = ({ colors }: { colors: any }) => {
 };
 
 // 示例组件：背景色与模糊效果
-const BackgroundExample = ({ colors }: { colors: any }) => {
+const BackgroundExample = ({ colors, t }: { colors: any; t: any }) => {
   const [backgroundColor, setBackgroundColor] = useState("#222222");
 
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        背景色与模糊效果
+        {t("image.background.title")}
       </Text>
       <View style={[styles.backgroundExample, { backgroundColor }]}>
         <Image
@@ -234,6 +239,7 @@ export default function ImageExample() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const router = useRouter();
+  const { t } = useI18n();
 
   // 返回按钮处理函数
   const handleBack = () => {
@@ -242,12 +248,20 @@ export default function ImageExample() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.borderBottom,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Expo Image 示例
+          {t("image.title")}
         </Text>
         <View style={styles.rightPlaceholder} />
       </View>
@@ -259,15 +273,14 @@ export default function ImageExample() {
       >
         <View style={styles.infoContainer}>
           <Text style={[styles.infoText, { color: colors.secondaryAccent }]}>
-            Expo Image
-            是一个高性能的跨平台图片组件，支持多种格式、缓存策略和过渡效果
+            {t("image.info")}
           </Text>
         </View>
 
-        <ContentFitExample colors={colors} />
-        <PlaceholderExample colors={colors} />
-        <TransitionExample colors={colors} />
-        <BackgroundExample colors={colors} />
+        <ContentFitExample colors={colors} t={t} />
+        <PlaceholderExample colors={colors} t={t} />
+        <TransitionExample colors={colors} t={t} />
+        <BackgroundExample colors={colors} t={t} />
       </ScrollView>
     </View>
   );
@@ -284,6 +297,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 16,
+    borderBottomWidth: 1,
   },
   backButton: {
     padding: 8,

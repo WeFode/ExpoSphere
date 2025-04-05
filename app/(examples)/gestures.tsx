@@ -27,13 +27,13 @@ import Animated, {
   runOnJS,
   withSequence,
   interpolateColor,
-  useAnimatedGestureHandler,
 } from "react-native-reanimated";
+import { useI18n } from "@/i18n";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 // 拖拽示例
-const DragExample = ({ colors }: { colors: any }) => {
+const DragExample = ({ colors, t }: { colors: any; t: any }) => {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const isActive = useSharedValue(false);
@@ -66,12 +66,14 @@ const DragExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        拖拽手势 (Pan)
+        {t("gestures.panGesture")}
       </Text>
       <View style={styles.demoContainer}>
         <GestureDetector gesture={panGesture}>
           <Animated.View style={[styles.dragBox, animatedStyle]}>
-            <Text style={[styles.boxText, { color: "#ffffff" }]}>拖动我</Text>
+            <Text style={[styles.boxText, { color: "#ffffff" }]}>
+              {t("gestures.dragMe")}
+            </Text>
           </Animated.View>
         </GestureDetector>
       </View>
@@ -80,7 +82,7 @@ const DragExample = ({ colors }: { colors: any }) => {
 };
 
 // 多点触控示例
-const PinchExample = ({ colors }: { colors: any }) => {
+const PinchExample = ({ colors, t }: { colors: any; t: any }) => {
   const scale = useSharedValue(1);
 
   const pinchRef = useRef(null);
@@ -94,7 +96,7 @@ const PinchExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        缩放手势 (Pinch)
+        {t("gestures.pinchGesture")}
       </Text>
       <View style={styles.demoContainer}>
         <PinchGestureHandler ref={pinchRef}>
@@ -110,7 +112,7 @@ const PinchExample = ({ colors }: { colors: any }) => {
 };
 
 // 双击示例
-const DoubleTapExample = ({ colors }: { colors: any }) => {
+const DoubleTapExample = ({ colors, t }: { colors: any; t: any }) => {
   const [tapped, setTapped] = useState(false);
   const scale = useSharedValue(1);
 
@@ -138,7 +140,7 @@ const DoubleTapExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        双击手势 (Double Tap)
+        {t("gestures.doubleTapGesture")}
       </Text>
       <View style={styles.demoContainer}>
         <GestureDetector gesture={doubleTapGesture}>
@@ -149,7 +151,7 @@ const DoubleTapExample = ({ colors }: { colors: any }) => {
                 { color: tapped ? "#ffffff" : colors.text },
               ]}
             >
-              双击我
+              {t("gestures.doubleTapMe")}
             </Text>
           </Animated.View>
         </GestureDetector>
@@ -159,13 +161,13 @@ const DoubleTapExample = ({ colors }: { colors: any }) => {
 };
 
 // 长按示例
-const LongPressExample = ({ colors }: { colors: any }) => {
+const LongPressExample = ({ colors, t }: { colors: any; t: any }) => {
   const longPressProgress = useSharedValue(0);
   const longPressActive = useSharedValue(false);
 
   const onLongPress = (state: State) => {
     if (state === State.ACTIVE) {
-      Alert.alert("触发长按", "长按手势被识别！");
+      Alert.alert(t("gestures.longPressAlert"), t("gestures.longPressMessage"));
     }
   };
 
@@ -202,13 +204,15 @@ const LongPressExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        长按手势 (Long Press)
+        {t("gestures.longPressGesture")}
       </Text>
       <View style={styles.demoContainer}>
         <GestureDetector gesture={longPressGesture}>
           <Animated.View style={[styles.longPressBox, animatedStyle]}>
             <Animated.View style={[styles.progressBar, progressStyle]} />
-            <Text style={[styles.boxText, { color: colors.text }]}>长按我</Text>
+            <Text style={[styles.boxText, { color: colors.text }]}>
+              {t("gestures.longPressMe")}
+            </Text>
           </Animated.View>
         </GestureDetector>
       </View>
@@ -221,6 +225,7 @@ export default function GesturesExample() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const router = useRouter();
+  const { t } = useI18n();
 
   // 返回按钮处理函数
   const handleBack = () => {
@@ -229,12 +234,20 @@ export default function GesturesExample() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.borderBottom,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          手势交互示例
+          {t("gestures.title")}
         </Text>
         <View style={styles.rightPlaceholder} />
       </View>
@@ -246,15 +259,14 @@ export default function GesturesExample() {
       >
         <View style={styles.infoContainer}>
           <Text style={[styles.infoText, { color: colors.secondaryAccent }]}>
-            React Native Gesture Handler
-            提供了一套处理触摸手势的API，基于原生平台能力构建，性能更好、更加灵活。
+            {t("gestures.info")}
           </Text>
         </View>
 
-        <DragExample colors={colors} />
-        <PinchExample colors={colors} />
-        <DoubleTapExample colors={colors} />
-        <LongPressExample colors={colors} />
+        <DragExample colors={colors} t={t} />
+        <PinchExample colors={colors} t={t} />
+        <DoubleTapExample colors={colors} t={t} />
+        <LongPressExample colors={colors} t={t} />
       </ScrollView>
     </View>
   );
@@ -269,8 +281,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "ios" ? 48 : 16,
+    paddingTop: 16,
     paddingBottom: 16,
+    borderBottomWidth: 1,
   },
   backButton: {
     padding: 8,

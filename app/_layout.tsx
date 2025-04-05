@@ -2,11 +2,13 @@ import { Stack } from "expo-router";
 import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { initLanguage } from "@/i18n";
+import AppSplashScreen from "./SplashScreen";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [isSplashComplete, setIsSplashComplete] = useState(false);
 
   // 初始化i18n
   useEffect(() => {
@@ -16,6 +18,11 @@ export default function RootLayout() {
 
     setupLanguage();
   }, []);
+
+  // 若启动屏幕未完成，显示启动屏幕
+  if (!isSplashComplete) {
+    return <AppSplashScreen onFinish={() => setIsSplashComplete(true)} />;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

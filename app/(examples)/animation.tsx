@@ -29,11 +29,12 @@ import Animated, {
   FlipInEasyX,
   Layout,
 } from "react-native-reanimated";
+import { useI18n } from "@/i18n";
 
 const { width } = Dimensions.get("window");
 
 // 基础动画示例
-const BasicAnimationExample = ({ colors }: { colors: any }) => {
+const BasicAnimationExample = ({ colors, t }: { colors: any; t: any }) => {
   const [expanded, setExpanded] = useState(false);
   const boxWidth = useSharedValue(100);
   const borderRadius = useSharedValue(8);
@@ -57,13 +58,15 @@ const BasicAnimationExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        基础动画 (Basic)
+        {t("animation.basicAnimation")}
       </Text>
       <View style={styles.demoContainer}>
         <TouchableOpacity onPress={toggleExpanded} activeOpacity={1}>
           <Animated.View style={[styles.animatedBox, animatedStyle]}>
             <Text style={[styles.boxText, { color: "#ffffff" }]}>
-              {expanded ? "点击收起" : "点击展开"}
+              {expanded
+                ? t("animation.clickCollapse")
+                : t("animation.clickExpand")}
             </Text>
           </Animated.View>
         </TouchableOpacity>
@@ -71,14 +74,14 @@ const BasicAnimationExample = ({ colors }: { colors: any }) => {
       <Text
         style={[styles.sectionDescription, { color: colors.secondaryAccent }]}
       >
-        使用withSpring实现弹性动画效果
+        {t("animation.springDescription")}
       </Text>
     </View>
   );
 };
 
 // 序列动画示例
-const SequenceAnimationExample = ({ colors }: { colors: any }) => {
+const SequenceAnimationExample = ({ colors, t }: { colors: any; t: any }) => {
   const offset = useSharedValue(0);
   const rotation = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -131,7 +134,7 @@ const SequenceAnimationExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        序列动画 (Sequence)
+        {t("animation.sequenceAnimation")}
       </Text>
       <View style={styles.demoContainer}>
         <Animated.View style={[styles.animatedSquare, animatedStyle]} />
@@ -141,21 +144,23 @@ const SequenceAnimationExample = ({ colors }: { colors: any }) => {
           disabled={isPlaying}
         >
           <Text style={styles.playButtonText}>
-            {isPlaying ? "播放中..." : "播放动画"}
+            {isPlaying
+              ? t("animation.playingAnimation")
+              : t("animation.playAnimation")}
           </Text>
         </TouchableOpacity>
       </View>
       <Text
         style={[styles.sectionDescription, { color: colors.secondaryAccent }]}
       >
-        使用withSequence和withDelay组合多个动画
+        {t("animation.sequenceDescription")}
       </Text>
     </View>
   );
 };
 
 // 重复动画示例
-const RepeatAnimationExample = ({ colors }: { colors: any }) => {
+const RepeatAnimationExample = ({ colors, t }: { colors: any; t: any }) => {
   const [isActive, setIsActive] = useState(false);
   const rotation = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -206,7 +211,7 @@ const RepeatAnimationExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        重复动画 (Repeat)
+        {t("animation.repeatAnimation")}
       </Text>
       <View style={styles.demoContainer}>
         <Animated.View
@@ -217,7 +222,9 @@ const RepeatAnimationExample = ({ colors }: { colors: any }) => {
           ]}
         />
         <View style={styles.switchContainer}>
-          <Text style={{ color: colors.text, marginRight: 8 }}>启用动画</Text>
+          <Text style={{ color: colors.text, marginRight: 8 }}>
+            {t("animation.enableAnimation")}
+          </Text>
           <Switch
             value={isActive}
             onValueChange={setIsActive}
@@ -229,14 +236,14 @@ const RepeatAnimationExample = ({ colors }: { colors: any }) => {
       <Text
         style={[styles.sectionDescription, { color: colors.secondaryAccent }]}
       >
-        使用withRepeat实现循环动画效果
+        {t("animation.repeatDescription")}
       </Text>
     </View>
   );
 };
 
 // 内置动画示例
-const BuiltInAnimationExample = ({ colors }: { colors: any }) => {
+const BuiltInAnimationExample = ({ colors, t }: { colors: any; t: any }) => {
   const [items, setItems] = useState([0, 1, 2]);
   const [key, setKey] = useState(3);
 
@@ -274,7 +281,7 @@ const BuiltInAnimationExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        内置动画 (Built-in)
+        {t("animation.builtInAnimation")}
       </Text>
       <View style={styles.demoContainer}>
         <View style={styles.animationListContainer}>
@@ -285,27 +292,27 @@ const BuiltInAnimationExample = ({ colors }: { colors: any }) => {
             style={[styles.button, { backgroundColor: colors.tint }]}
             onPress={addItem}
           >
-            <Text style={styles.buttonText}>添加</Text>
+            <Text style={styles.buttonText}>{t("animation.add")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.button, { backgroundColor: colors.secondaryAccent }]}
             onPress={removeItem}
           >
-            <Text style={styles.buttonText}>移除</Text>
+            <Text style={styles.buttonText}>{t("animation.remove")}</Text>
           </TouchableOpacity>
         </View>
       </View>
       <Text
         style={[styles.sectionDescription, { color: colors.secondaryAccent }]}
       >
-        使用内置动画和Layout进行列表过渡
+        {t("animation.builtInDescription")}
       </Text>
     </View>
   );
 };
 
 // 滚动动画示例
-const ScrollAnimationExample = ({ colors }: { colors: any }) => {
+const ScrollAnimationExample = ({ colors, t }: { colors: any; t: any }) => {
   const scrollY = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -360,12 +367,12 @@ const ScrollAnimationExample = ({ colors }: { colors: any }) => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        滚动动画 (Scroll)
+        {t("animation.scrollAnimation")}
       </Text>
       <Text
         style={[styles.sectionDescription, { color: colors.secondaryAccent }]}
       >
-        尝试上下滚动查看效果
+        {t("animation.scrollDescription")}
       </Text>
       <View style={styles.scrollAnimationContainer}>
         <Animated.ScrollView
@@ -387,6 +394,7 @@ export default function AnimationExample() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const router = useRouter();
+  const { t } = useI18n();
 
   // 返回按钮处理函数
   const handleBack = () => {
@@ -395,12 +403,20 @@ export default function AnimationExample() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.borderBottom,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          动画效果示例
+          {t("animation.title")}
         </Text>
         <View style={styles.rightPlaceholder} />
       </View>
@@ -412,16 +428,15 @@ export default function AnimationExample() {
       >
         <View style={styles.infoContainer}>
           <Text style={[styles.infoText, { color: colors.secondaryAccent }]}>
-            Reanimated
-            是一个声明式动画库，能够创建流畅、高性能的动画，下面展示了各种常用的动画效果。
+            {t("animation.info")}
           </Text>
         </View>
 
-        <BasicAnimationExample colors={colors} />
-        <SequenceAnimationExample colors={colors} />
-        <RepeatAnimationExample colors={colors} />
-        <BuiltInAnimationExample colors={colors} />
-        <ScrollAnimationExample colors={colors} />
+        <BasicAnimationExample colors={colors} t={t} />
+        <SequenceAnimationExample colors={colors} t={t} />
+        <RepeatAnimationExample colors={colors} t={t} />
+        <BuiltInAnimationExample colors={colors} t={t} />
+        <ScrollAnimationExample colors={colors} t={t} />
       </ScrollView>
     </View>
   );
@@ -436,8 +451,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "ios" ? 48 : 16,
+    paddingTop: 16,
     paddingBottom: 16,
+    borderBottomWidth: 1,
   },
   backButton: {
     padding: 8,

@@ -47,6 +47,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "permissions": ["CAMERA", "MEDIA_LIBRARY", "MEDIA_LIBRARY_WRITE_ONLY"],
+    "infoPlist": {
+      "NSCameraUsageDescription": "This app uses the camera to scan barcodes and take photos.",
+      "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save captured images and share them.",
+      "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save captured images."
     }
   }
 }

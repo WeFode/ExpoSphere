@@ -13,6 +13,7 @@ export default {
     notification: "#ff3b30",
     primaryAccent: "#555555",
     secondaryAccent: "#999999",
+    borderBottom: "rgba(0,0,0,0.1)",
   },
   dark: {
     text: "#ffffff",
@@ -25,5 +26,6 @@ export default {
     notification: "#ff453a",
     primaryAccent: "#aaaaaa",
     secondaryAccent: "#666666",
+    borderBottom: "rgba(255,255,255,0.1)",
   },
 };

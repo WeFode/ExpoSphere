@@ -18,6 +18,7 @@ import { useRouter } from "expo-router";
 import * as MediaLibrary from "expo-media-library";
 import Slider from "@react-native-community/slider";
 import Colors from "@/constants/Colors";
+import { useI18n } from "@/i18n";
 import {
   CameraView,
   CameraType,
@@ -34,6 +35,7 @@ export default function CameraExample() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
+  const { t } = useI18n();
 
   // 权限状态
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -133,10 +135,17 @@ export default function CameraExample() {
   const handleBarCodeScanned = (result: BarcodeScanningResult) => {
     if (enableBarCodeScanning && !scannedBarcode) {
       setScannedBarcode(`${result.type}: ${result.data}`);
-      Alert.alert("扫描结果", `类型: ${result.type}\n数据: ${result.data}`, [
-        { text: "继续扫描", onPress: () => setScannedBarcode(null) },
-        { text: "确定", style: "default" },
-      ]);
+      Alert.alert(
+        t("camera.scanResult"),
+        `${t("camera.scanType")}: ${result.type}\n${t("camera.scanData")}: ${result.data}`,
+        [
+          {
+            text: t("camera.continueScan"),
+            onPress: () => setScannedBarcode(null),
+          },
+          { text: t("camera.confirm"), style: "default" },
+        ],
+      );
     }
   };
 
@@ -163,7 +172,7 @@ export default function CameraExample() {
       }
     } catch (error) {
       console.error("拍照错误:", error);
-      Alert.alert("错误", "拍照失败，请重试");
+      Alert.alert(t("common.error"), t("camera.recordingFailed"));
     } finally {
       setProcessingPhoto(false);
     }
@@ -190,12 +199,12 @@ export default function CameraExample() {
         // 保存到相册
         if (mediaLibraryPermission) {
           await MediaLibrary.saveToLibraryAsync(recordResult.uri);
-          Alert.alert("成功", "视频已保存到相册");
+          Alert.alert(t("camera.recordingSuccess"), t("camera.videoSaved"));
         }
       }
     } catch (error) {
       console.error("录像错误:", error);
-      Alert.alert("错误", "录像失败，请重试");
+      Alert.alert(t("camera.recordingError"), t("camera.recordingFailed"));
     } finally {
       setIsRecording(false);
     }
@@ -211,13 +220,15 @@ export default function CameraExample() {
     return (
       <View style={styles.permissionContainer}>
         <Text style={[styles.permissionText, { color: colors.text }]}>
-          需要相机权限才能使用此功能
+          {t("camera.permissions.needPermission")}
         </Text>
         <TouchableOpacity
           style={[styles.permissionButton, { backgroundColor: colors.tint }]}
           onPress={requestPermissions}
         >
-          <Text style={styles.permissionButtonText}>授予权限</Text>
+          <Text style={styles.permissionButtonText}>
+            {t("camera.permissions.grantPermission")}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -429,12 +440,20 @@ export default function CameraExample() {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.borderBottom,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          相机示例
+          {t("camera.title")}
         </Text>
         <View style={styles.placeholder} />
       </View>
@@ -443,14 +462,10 @@ export default function CameraExample() {
 
       <ScrollView style={styles.infoContainer}>
         <Text style={[styles.infoTitle, { color: colors.text }]}>
-          相机功能说明
+          {t("camera.info")}
         </Text>
         <Text style={[styles.infoText, { color: colors.text }]}>
-          • 左上角按钮: 切换前后摄像头{"\n"}• 闪光灯: 切换闪光灯模式
-          (关闭/开启/自动){"\n"}• 手电筒: 开启/关闭手电筒 (仅后置摄像头){"\n"}•
-          对焦: 切换自动对焦模式{"\n"}• 二维码: 开启/关闭二维码扫描{"\n"}• 滑块:
-          调整相机缩放{"\n"}• 左下按钮: 切换拍照/录像模式{"\n"}• 中间大按钮:
-          拍照或开始/停止录像{"\n"}• 右下按钮: 暂停/恢复相机预览
+          {`• ${t("camera.controls.switchCamera")}\n• ${t("camera.controls.flash")}\n• ${t("camera.controls.torch")}\n• ${t("camera.controls.focus")}\n• ${t("camera.controls.barcode")}\n• ${t("camera.controls.zoom")}\n• ${t("camera.controls.mode")}\n• ${t("camera.controls.middleButton")}\n• ${t("camera.controls.pauseCamera")}`}
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -466,10 +481,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "ios" ? 0 : 16,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.1)",
   },
   headerTitle: {
     fontSize: 20,

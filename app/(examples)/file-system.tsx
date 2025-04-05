@@ -17,6 +17,7 @@ import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as FileSystem from "expo-file-system";
+import { useI18n } from "@/i18n";
 
 // 定义 Todo 类型
 interface Todo {
@@ -34,6 +35,7 @@ export default function FileSystemExample() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const router = useRouter();
+  const { t } = useI18n();
 
   // 状态管理
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -64,13 +66,13 @@ export default function FileSystemExample() {
         const initialTodos: Todo[] = [
           {
             id: "1",
-            title: "学习文件系统API",
+            title: t("fileSystem.todo.learnFileSystemAPI"),
             completed: false,
             createdAt: new Date().toISOString(),
           },
           {
             id: "2",
-            title: "尝试保存待办事项",
+            title: t("fileSystem.todo.trySaveTodos"),
             completed: false,
             createdAt: new Date().toISOString(),
           },
@@ -81,7 +83,7 @@ export default function FileSystemExample() {
       }
     } catch (error) {
       console.error("加载待办事项失败", error);
-      Alert.alert("错误", "无法加载待办事项列表");
+      Alert.alert(t("common.error"), t("fileSystem.todo.errorLoadTodos"));
     } finally {
       setLoading(false);
     }
@@ -103,7 +105,7 @@ export default function FileSystemExample() {
       return true;
     } catch (error) {
       console.error("保存待办事项失败", error);
-      Alert.alert("错误", "无法保存待办事项列表");
+      Alert.alert(t("common.error"), t("fileSystem.todo.errorSaveTodos"));
       return false;
     }
   };
@@ -175,22 +177,25 @@ export default function FileSystemExample() {
         to: backupPath,
       });
 
-      Alert.alert("导出成功", `待办事项已备份到:\n${backupPath}`);
+      Alert.alert(
+        t("fileSystem.todo.exportSuccess"),
+        `${t("fileSystem.todo.exportSuccessMessage")}\n${backupPath}`,
+      );
     } catch (error) {
       console.error("导出失败", error);
-      Alert.alert("错误", "无法导出待办事项列表");
+      Alert.alert(t("common.error"), t("fileSystem.todo.errorExport"));
     }
   };
 
   // 删除所有待办事项
   const deleteAllTodos = async () => {
     Alert.alert(
-      "删除所有待办事项",
-      "确定要删除所有待办事项吗？此操作不可撤销。",
+      t("fileSystem.todo.confirmDelete"),
+      t("fileSystem.todo.confirmDeleteMessage"),
       [
-        { text: "取消", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "删除",
+          text: t("common.delete"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -214,10 +219,13 @@ export default function FileSystemExample() {
                 modificationTime: Date.now() / 1000,
               });
 
-              Alert.alert("已删除", "所有待办事项已删除");
+              Alert.alert(
+                t("fileSystem.todo.deleteSuccess"),
+                t("fileSystem.todo.deleteSuccessMessage"),
+              );
             } catch (error) {
               console.error("删除失败", error);
-              Alert.alert("错误", "无法删除待办事项");
+              Alert.alert(t("common.error"), t("fileSystem.todo.errorDelete"));
             }
           },
         },
@@ -282,17 +290,21 @@ export default function FileSystemExample() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
     >
-      <StatusBar
-        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-      />
-
       {/* 头部导航 */}
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.borderBottom,
+          },
+        ]}
+      >
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          文件系统待办清单
+          {t("fileSystem.title")}
         </Text>
         <View style={styles.headerRight} />
       </View>
@@ -302,7 +314,7 @@ export default function FileSystemExample() {
         <View style={styles.infoRow}>
           <View style={styles.infoItem}>
             <Text style={[styles.infoLabel, { color: colors.secondaryAccent }]}>
-              文件大小
+              {t("fileSystem.info.fileSize")}
             </Text>
             <Text style={[styles.infoValue, { color: colors.text }]}>
               {fileStats.fileSize}
@@ -311,7 +323,7 @@ export default function FileSystemExample() {
 
           <View style={styles.infoItem}>
             <Text style={[styles.infoLabel, { color: colors.secondaryAccent }]}>
-              最后修改
+              {t("fileSystem.info.lastModified")}
             </Text>
             <Text style={[styles.infoValue, { color: colors.text }]}>
               {fileStats.lastModified}
@@ -320,7 +332,7 @@ export default function FileSystemExample() {
 
           <View style={styles.infoItem}>
             <Text style={[styles.infoLabel, { color: colors.secondaryAccent }]}>
-              已完成
+              {t("fileSystem.info.completed")}
             </Text>
             <Text style={[styles.infoValue, { color: colors.text }]}>
               {fileStats.completedCount}/{todos.length}
@@ -329,7 +341,7 @@ export default function FileSystemExample() {
         </View>
 
         <Text style={[styles.filePath, { color: colors.secondaryAccent }]}>
-          存储路径: {TODO_FILE}
+          {t("fileSystem.info.storagePath")} {TODO_FILE}
         </Text>
       </View>
 
@@ -340,7 +352,7 @@ export default function FileSystemExample() {
             styles.input,
             { color: colors.text, borderColor: colors.border },
           ]}
-          placeholder="添加新待办事项..."
+          placeholder={t("fileSystem.todo.addNew")}
           placeholderTextColor={colors.secondaryAccent}
           value={newTodo}
           onChangeText={setNewTodo}
@@ -358,7 +370,7 @@ export default function FileSystemExample() {
       <View style={styles.listContainer}>
         <View style={styles.listHeader}>
           <Text style={[styles.listTitle, { color: colors.text }]}>
-            待办事项列表
+            {t("fileSystem.todo.list")}
           </Text>
           <View style={styles.actionButtons}>
             <TouchableOpacity
@@ -367,7 +379,7 @@ export default function FileSystemExample() {
             >
               <Ionicons name="download-outline" size={18} color={colors.tint} />
               <Text style={[styles.actionButtonText, { color: colors.tint }]}>
-                导出
+                {t("fileSystem.todo.export")}
               </Text>
             </TouchableOpacity>
 
@@ -377,7 +389,7 @@ export default function FileSystemExample() {
             >
               <Ionicons name="trash-outline" size={18} color="#F44336" />
               <Text style={[styles.actionButtonText, { color: "#F44336" }]}>
-                清空
+                {t("fileSystem.todo.clear")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -389,19 +401,19 @@ export default function FileSystemExample() {
             <Text
               style={[styles.loadingText, { color: colors.secondaryAccent }]}
             >
-              正在读取待办事项...
+              {t("fileSystem.todo.loading")}
             </Text>
           </View>
         ) : todos.length === 0 ? (
           <View style={styles.centerContent}>
             <Ionicons name="list" size={64} color={colors.secondaryAccent} />
             <Text style={[styles.emptyText, { color: colors.text }]}>
-              暂无待办事项
+              {t("fileSystem.todo.empty")}
             </Text>
             <Text
               style={[styles.emptySubtext, { color: colors.secondaryAccent }]}
             >
-              添加一些待办事项来体验文件系统存储功能
+              {t("fileSystem.todo.emptySubtext")}
             </Text>
           </View>
         ) : (
@@ -417,7 +429,7 @@ export default function FileSystemExample() {
       {/* 文件系统说明 */}
       <View style={[styles.footer, { backgroundColor: colors.card }]}>
         <Text style={[styles.footerTitle, { color: colors.text }]}>
-          文件系统功能展示
+          {t("fileSystem.features.title")}
         </Text>
         <View style={styles.featureList}>
           <View style={styles.featureItem}>
@@ -429,7 +441,7 @@ export default function FileSystemExample() {
             <Text
               style={[styles.featureText, { color: colors.secondaryAccent }]}
             >
-              JSON格式存储
+              {t("fileSystem.features.jsonStorage")}
             </Text>
           </View>
           <View style={styles.featureItem}>
@@ -437,7 +449,7 @@ export default function FileSystemExample() {
             <Text
               style={[styles.featureText, { color: colors.secondaryAccent }]}
             >
-              自动持久化
+              {t("fileSystem.features.autoPersistence")}
             </Text>
           </View>
           <View style={styles.featureItem}>
@@ -445,7 +457,7 @@ export default function FileSystemExample() {
             <Text
               style={[styles.featureText, { color: colors.secondaryAccent }]}
             >
-              文件备份
+              {t("fileSystem.features.fileBackup")}
             </Text>
           </View>
         </View>
@@ -463,22 +475,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "ios" ? 48 : 16,
+    paddingTop: 16,
     paddingBottom: 16,
+    borderBottomWidth: 1,
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   headerRight: {
     width: 40,
   },
   infoCard: {
     margin: 16,
-    marginTop: 8,
+    marginTop: 16,
     borderRadius: 12,
     padding: 16,
     ...Platform.select({

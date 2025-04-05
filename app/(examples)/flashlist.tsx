@@ -15,15 +15,16 @@ import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { Swipeable, RectButton } from "react-native-gesture-handler";
+import { useI18n } from "@/i18n";
 
 // 生成示例数据
-const generateListData = (count: number, startFrom = 0) => {
+const generateListData = (count: number, startFrom = 0, t: any) => {
   return Array.from({ length: count }, (_, i) => {
     const id = startFrom + i + 1;
     return {
       id: `item-${id}`,
-      title: `项目 ${id}`,
-      description: `这是关于项目 ${id} 的一些描述文本，可以看到FlashList的性能非常好`,
+      title: `${t("flashlist.item")} ${id}`,
+      description: `${t("flashlist.description")} ${id}`,
     };
   });
 };
@@ -35,12 +36,12 @@ type ListItem = {
 };
 
 // 右侧操作按钮
-const renderRightActions = (onDelete: () => void) => {
+const renderRightActions = (onDelete: () => void, t: any) => {
   return (
     <View style={styles.rightActions}>
       <RectButton style={[styles.deleteButton]} onPress={onDelete}>
         <Ionicons name="trash-outline" size={24} color="#fff" />
-        <Text style={styles.actionText}>删除</Text>
+        <Text style={styles.actionText}>{t("flashlist.delete")}</Text>
       </RectButton>
     </View>
   );
@@ -51,10 +52,12 @@ const ListItemCard = ({
   item,
   index,
   onDelete,
+  t,
 }: {
   item: ListItem;
   index: number;
   onDelete: (id: string) => void;
+  t: any;
 }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
@@ -64,10 +67,18 @@ const ListItemCard = ({
     if (swipeableRef.current) {
       swipeableRef.current.close();
     }
-    Alert.alert("确认删除", `确定要删除 ${item.title} 吗?`, [
-      { text: "取消", style: "cancel" },
-      { text: "删除", onPress: () => onDelete(item.id), style: "destructive" },
-    ]);
+    Alert.alert(
+      t("flashlist.confirmDelete"),
+      `${t("flashlist.confirmDeleteMessage")} ${item.title} ?`,
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("flashlist.delete"),
+          onPress: () => onDelete(item.id),
+          style: "destructive",
+        },
+      ],
+    );
   };
 
   return (
@@ -77,7 +88,7 @@ const ListItemCard = ({
         friction={2}
         leftThreshold={80}
         rightThreshold={40}
-        renderRightActions={() => renderRightActions(handleDelete)}
+        renderRightActions={() => renderRightActions(handleDelete, t)}
       >
         <View style={[styles.itemContainer, { backgroundColor: colors.card }]}>
           <View style={styles.itemContent}>
@@ -111,10 +122,17 @@ export default function FlashListExample() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const router = useRouter();
+  const { t } = useI18n();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDataEmpty, setIsDataEmpty] = useState(false);
-  const [data, setData] = useState<ListItem[]>(generateListData(50));
+  const [data, setData] = useState<ListItem[]>(() => {
+    return generateListData(50, 0, t).map((item) => ({
+      ...item,
+      title: `${t("flashlist.item")} ${item.id.split("-")[1]}`,
+      description: t("flashlist.description"),
+    }));
+  });
 
   // 空状态
   const EmptyComponent = () => {
@@ -126,7 +144,7 @@ export default function FlashListExample() {
           color={colors.secondaryAccent}
         />
         <Text style={[styles.emptyText, { color: colors.secondaryAccent }]}>
-          列表暂无数据
+          {t("flashlist.emptyState")}
         </Text>
       </View>
     );
@@ -140,28 +158,40 @@ export default function FlashListExample() {
     setRefreshing(true);
     setTimeout(() => {
       // 刷新时不清空数据，而是重新加载
-      setData(generateListData(50));
+      const newData = generateListData(50, 0, t).map((item) => ({
+        ...item,
+        title: `${t("flashlist.item")} ${item.id.split("-")[1]}`,
+        description: t("flashlist.description"),
+      }));
+      setData(newData);
       setRefreshing(false);
       setIsDataEmpty(false); // 刷新时清除空状态
     }, 1000);
-  }, []);
+  }, [t]);
 
   const handleLoadMore = useCallback(() => {
     if (loading) return;
     setLoading(true);
     setTimeout(() => {
-      setData((prevData) => [
-        ...prevData,
-        ...generateListData(20, prevData.length),
-      ]);
+      const newItems = generateListData(20, data.length, t).map((item) => ({
+        ...item,
+        title: `${t("flashlist.item")} ${item.id.split("-")[1]}`,
+        description: t("flashlist.description"),
+      }));
+      setData((prevData) => [...prevData, ...newItems]);
       setLoading(false);
     }, 800);
-  }, [loading]);
+  }, [loading, data.length, t]);
 
   const exchangeEmpty = () => {
     if (isDataEmpty) {
       // 加载示例数据
-      setData(generateListData(50));
+      const newData = generateListData(50, 0, t).map((item) => ({
+        ...item,
+        title: `${t("flashlist.item")} ${item.id.split("-")[1]}`,
+        description: t("flashlist.description"),
+      }));
+      setData(newData);
     } else {
       // 切换为空状态
       setData([]);
@@ -182,7 +212,7 @@ export default function FlashListExample() {
       <View style={styles.footerContainer}>
         <ActivityIndicator size="small" color={colors.tint} />
         <Text style={[styles.loadingText, { color: colors.secondaryAccent }]}>
-          加载更多...
+          {t("flashlist.loadingMore")}
         </Text>
       </View>
     );
@@ -190,27 +220,36 @@ export default function FlashListExample() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.borderBottom,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          FlashList 示例
+          {t("flashlist.title")}
         </Text>
         <View style={styles.rightPlaceholder} />
       </View>
 
       <View style={styles.infoContainer}>
         <Text style={[styles.infoText, { color: colors.secondaryAccent }]}>
-          FlashList 是一种高性能列表组件，相比 FlatList
-          效率更高，适合处理大量数据
+          {t("flashlist.info")}
         </Text>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.card }]}
           onPress={exchangeEmpty}
         >
           <Text style={[styles.buttonText, { color: colors.text }]}>
-            {isDataEmpty ? "加载示例数据" : "切换为空状态"}
+            {isDataEmpty
+              ? t("flashlist.loadExampleData")
+              : t("flashlist.switchToEmpty")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -218,7 +257,12 @@ export default function FlashListExample() {
       <FlashList
         data={data}
         renderItem={({ item, index }) => (
-          <ListItemCard item={item} index={index} onDelete={handleDelete} />
+          <ListItemCard
+            item={item}
+            index={index}
+            onDelete={handleDelete}
+            t={t}
+          />
         )}
         ListEmptyComponent={EmptyComponent}
         estimatedItemSize={100}
@@ -256,6 +300,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 16,
+    borderBottomWidth: 1,
   },
   backButton: {
     padding: 8,
@@ -268,8 +313,8 @@ const styles = StyleSheet.create({
     width: 40,
   },
   infoContainer: {
+    paddingVertical: 16,
     paddingHorizontal: 16,
-    paddingBottom: 16,
   },
   infoText: {
     fontSize: 14,

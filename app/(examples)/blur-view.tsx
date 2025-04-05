@@ -9,12 +9,14 @@ import {
   Platform,
   Switch,
   useColorScheme,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import Colors from "@/constants/Colors";
 import Slider from "@react-native-community/slider";
+import { useI18n } from "@/i18n";
 
 // 定义色调类型
 type TintType =
@@ -47,9 +49,10 @@ export default function BlurViewExample() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
+  const { t } = useI18n();
 
   // 控制模糊强度
-  const [intensity, setIntensity] = useState(50);
+  const [intensity, setIntensity] = useState(40);
 
   // 控制模糊色调
   const [currentTint, setCurrentTint] = useState<TintType>("default");
@@ -73,6 +76,11 @@ export default function BlurViewExample() {
   // 返回按钮处理函数
   const handleBack = () => {
     router.back();
+  };
+
+  // 选择色调
+  const selectTint = (selectedTint: TintType) => {
+    setCurrentTint(selectedTint);
   };
 
   // 生成彩色背景盒子
@@ -106,7 +114,7 @@ export default function BlurViewExample() {
     return (
       <View style={[styles.settingsPanel, { backgroundColor: colors.card }]}>
         <Text style={[styles.settingTitle, { color: colors.text }]}>
-          模糊强度: {intensity}
+          {t("blurView.intensity")}: {intensity}
         </Text>
         <Slider
           style={styles.slider}
@@ -120,7 +128,7 @@ export default function BlurViewExample() {
         />
 
         <Text style={[styles.settingTitle, { color: colors.text }]}>
-          模糊色调
+          {t("blurView.tintMode")}
         </Text>
         <View style={styles.tintContainer}>
           {[
@@ -140,7 +148,7 @@ export default function BlurViewExample() {
                   borderWidth: 2,
                 },
               ]}
-              onPress={() => setCurrentTint(tint as TintType)}
+              onPress={() => selectTint(tint as TintType)}
             >
               <Text
                 style={[
@@ -165,7 +173,7 @@ export default function BlurViewExample() {
           <>
             <View style={styles.androidSettings}>
               <Text style={[styles.settingTitle, { color: colors.text }]}>
-                启用 Android 实验性模糊
+                {t("blurView.androidBlurToggle")}
               </Text>
               <Switch
                 value={androidBlurEnabled}
@@ -181,7 +189,7 @@ export default function BlurViewExample() {
             {androidBlurEnabled && (
               <>
                 <Text style={[styles.settingTitle, { color: colors.text }]}>
-                  模糊减少因子: {blurReductionFactor}
+                  {t("blurView.blurReductionFactor")}: {blurReductionFactor}
                 </Text>
                 <Slider
                   style={styles.slider}
@@ -200,7 +208,7 @@ export default function BlurViewExample() {
 
         <View style={styles.androidSettings}>
           <Text style={[styles.settingTitle, { color: colors.text }]}>
-            使用圆角 (overflow: hidden)
+            {t("blurView.useRadius")} (overflow: hidden)
           </Text>
           <Switch
             value={useRadius}
@@ -217,12 +225,20 @@ export default function BlurViewExample() {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.borderBottom,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          模糊视图 (BlurView)
+          {t("blurView.title")}
         </Text>
         <TouchableOpacity onPress={() => setShowSettings(!showSettings)}>
           <Ionicons
@@ -240,10 +256,8 @@ export default function BlurViewExample() {
         contentContainerStyle={styles.scrollContent}
       >
         <Text style={[styles.description, { color: colors.text }]}>
-          BlurView 是一个能够模糊其底层内容的 React
-          组件。常用于导航栏、标签栏和模态框等。
-          {Platform.OS === "android" &&
-            "\n\n注意：Android 上的 BlurView 是一个实验性功能。"}
+          {t("blurView.info")}
+          {Platform.OS === "android" && "\n\n" + t("blurView.androidNote")}
         </Text>
 
         <View style={styles.demoContainer}>
@@ -267,18 +281,13 @@ export default function BlurViewExample() {
                 },
               ]}
             >
-              当前强度: {intensity}
-              {"\n"}
-              当前色调: {currentTint}
-              {Platform.OS === "android" &&
-                androidBlurEnabled &&
-                `\n减少因子: ${blurReductionFactor}`}
+              {t("blurView.blurredContent")}
             </Text>
           </BlurView>
 
           <View style={styles.blurExamplesContainer}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              不同强度对比
+              {t("blurView.differentIntensities")}
             </Text>
 
             <View style={styles.blurRow}>
@@ -289,7 +298,9 @@ export default function BlurViewExample() {
                 blurReductionFactor={blurReductionFactor}
                 style={[styles.smallBlur, useRadius && styles.withRadius]}
               >
-                <Text style={styles.smallBlurText}>强度: 25</Text>
+                <Text style={styles.smallBlurText}>
+                  {t("blurView.intensity25")}
+                </Text>
               </BlurView>
 
               <BlurView
@@ -299,7 +310,9 @@ export default function BlurViewExample() {
                 blurReductionFactor={blurReductionFactor}
                 style={[styles.smallBlur, useRadius && styles.withRadius]}
               >
-                <Text style={styles.smallBlurText}>强度: 50</Text>
+                <Text style={styles.smallBlurText}>
+                  {t("blurView.intensity50")}
+                </Text>
               </BlurView>
 
               <BlurView
@@ -309,7 +322,9 @@ export default function BlurViewExample() {
                 blurReductionFactor={blurReductionFactor}
                 style={[styles.smallBlur, useRadius && styles.withRadius]}
               >
-                <Text style={styles.smallBlurText}>强度: 100</Text>
+                <Text style={styles.smallBlurText}>
+                  {t("blurView.intensity100")}
+                </Text>
               </BlurView>
             </View>
           </View>
@@ -317,16 +332,25 @@ export default function BlurViewExample() {
 
         <View style={styles.tipContainer}>
           <Text style={[styles.tipTitle, { color: colors.text }]}>
-            使用技巧:
+            {t("blurView.tipsTitle")}
           </Text>
           <Text style={[styles.tipText, { color: colors.text }]}>
-            1. 使用 intensity 属性 (1-100) 控制模糊强度。{"\n"}
-            2. 使用 tint 属性设置色调 (light, dark, default 等)。{"\n"}
-            3. 在 Android 上启用实验性支持使用 experimentalBlurMethod 属性。
-            {"\n"}
-            4. 使用 blurReductionFactor 调整 Android 上的模糊强度。{"\n"}
-            5. 需要圆角效果时，添加 overflow: 'hidden' 样式。{"\n"}
-            6. 当使用 FlatList 等动态内容时，应确保 BlurView 渲染在其后面。
+            {t("blurView.tip1")}
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            {t("blurView.tip2")}
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            {t("blurView.tip3")}
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            {t("blurView.tip4")}
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            {t("blurView.tip5")}
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            {t("blurView.tip6")}
           </Text>
         </View>
       </ScrollView>
@@ -343,10 +367,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "ios" ? 0 : 16,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.1)",
   },
   headerTitle: {
     fontSize: 20,

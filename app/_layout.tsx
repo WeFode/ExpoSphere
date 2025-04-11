@@ -37,6 +37,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         {/*  presentation: 'modal' 以模态方式展示，而不会跳转整个页面 */}
         <Stack.Screen name="(examples)" options={{ presentation: "modal" }} />
+        <Stack.Screen name="(components)" options={{ presentation: "modal" }} />
       </Stack>
     </GestureHandlerRootView>
   );

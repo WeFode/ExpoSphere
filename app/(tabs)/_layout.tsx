@@ -54,6 +54,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="components"
+        options={{
+          title: t("tabs.components") || "组件库",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid-outline" size={size} color={color} />
+          ),
+          headerShown: true,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: t("tabs.profile"),

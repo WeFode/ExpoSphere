@@ -7,7 +7,6 @@ import {
   Image,
   ScrollView,
   Alert,
-  Platform,
   useColorScheme,
   SafeAreaView,
   Dimensions,
@@ -27,7 +26,6 @@ import {
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   runOnJS,
 } from "react-native-reanimated";
 
@@ -36,9 +34,31 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 // 示例贴纸数据
 const STICKERS = [
-  { id: "s1", source: require("@/assets/images/heart.png"), name: "心形" },
-  { id: "s2", source: require("@/assets/images/star.png"), name: "星星" },
-  { id: "s3", source: require("@/assets/images/logo.png"), name: "Logo" },
+  {
+    id: "s1",
+    source: "https://cdn-icons-png.flaticon.com/128/210/210545.png",
+    name: "Heart",
+  },
+  {
+    id: "s2",
+    source: "https://cdn-icons-png.flaticon.com/128/477/477406.png",
+    name: "Star",
+  },
+  {
+    id: "s3",
+    source: "https://cdn-icons-png.flaticon.com/128/2504/2504884.png",
+    name: "Logo",
+  },
+  {
+    id: "s4",
+    source: "https://cdn-icons-png.flaticon.com/128/4160/4160724.png",
+    name: "Emoji",
+  },
+  {
+    id: "s5",
+    source: "https://cdn-icons-png.flaticon.com/128/8146/8146767.png",
+    name: "Badge",
+  },
 ];
 
 // 签名点数据结构
@@ -376,6 +396,16 @@ export default function CaptureRefExample() {
     }
   };
 
+  // 更新贴纸位置
+  const updateStickerPosition = (id: string, x: number, y: number) => {
+    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, x, y } : s)));
+  };
+
+  // 更新贴纸缩放
+  const updateStickerScale = (id: string, scale: number) => {
+    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, scale } : s)));
+  };
+
   // 渲染贴纸元素 (使用手势)
   const StickerItem = ({ sticker }: { sticker: Sticker }) => {
     const isSelected = selectedStickerId === sticker.id;
@@ -383,18 +413,12 @@ export default function CaptureRefExample() {
     // 动画值
     const translateX = useSharedValue(sticker.x);
     const translateY = useSharedValue(sticker.y);
+    const scale = useSharedValue(sticker.scale);
     const rotation = useSharedValue(sticker.rotation);
 
     // 设置选中状态
     const handleStickerSelect = () => {
       setSelectedStickerId(isSelected ? null : sticker.id);
-    };
-
-    // 更新贴纸位置
-    const updateStickerPosition = (id: string, x: number, y: number) => {
-      setStickers((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, x, y } : s)),
-      );
     };
 
     // 平移手势
@@ -411,10 +435,19 @@ export default function CaptureRefExample() {
         runOnJS(setSelectedStickerId)(sticker.id);
       });
 
-    // 双指缩放和旋转手势功能可以在这里添加
+    // 双指缩放手势
+    const pinchGesture = Gesture.Pinch()
+      .onUpdate((e) => {
+        scale.value = sticker.scale * e.scale;
+      })
+      .onEnd((e) => {
+        const newScale = sticker.scale * e.scale;
+        runOnJS(updateStickerScale)(sticker.id, newScale);
+        runOnJS(setSelectedStickerId)(sticker.id);
+      });
 
     // 组合所有手势
-    const gesture = Gesture.Race(panGesture);
+    const gesture = Gesture.Simultaneous(panGesture, pinchGesture);
 
     // 设置动画样式
     const animatedStyle = useAnimatedStyle(() => {
@@ -422,7 +455,7 @@ export default function CaptureRefExample() {
         transform: [
           { translateX: translateX.value },
           { translateY: translateY.value },
-          { scale: withSpring(isSelected ? 1.05 : 1) },
+          { scale: scale.value },
           { rotate: `${rotation.value}deg` },
         ],
       };
@@ -432,7 +465,10 @@ export default function CaptureRefExample() {
       <GestureDetector gesture={gesture}>
         <Animated.View style={[styles.sticker, animatedStyle]}>
           <TouchableOpacity onPress={handleStickerSelect} activeOpacity={0.8}>
-            <Image source={sticker.source} style={styles.stickerImage} />
+            <Image
+              source={{ uri: sticker.source }}
+              style={styles.stickerImage}
+            />
             {isSelected && <View style={styles.stickerSelectedBorder} />}
           </TouchableOpacity>
         </Animated.View>
@@ -586,7 +622,7 @@ export default function CaptureRefExample() {
                 onPress={() => addSticker(sticker.id)}
               >
                 <Image
-                  source={sticker.source}
+                  source={{ uri: sticker.source }}
                   style={styles.stickerThumbnail}
                 />
                 <Text
@@ -602,7 +638,7 @@ export default function CaptureRefExample() {
         <View ref={stickerCanvasRef} style={styles.stickerCanvas}>
           <Image
             source={{
-              uri: "https://images.unsplash.com/photo-1599420186946-7b6fb4e297f0?q=80&w=1287",
+              uri: "https://img.freepik.com/free-photo/red-light-round-podium-black-background-mock-up_43614-950.jpg?ga=GA1.1.814210599.1742797381&semt=ais_hybrid&w=740",
             }}
             style={styles.canvasBackground}
             resizeMode="cover"
@@ -889,15 +925,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     overflow: "hidden",
     backgroundColor: "#f0f0f0",
+    position: "relative",
   },
   canvasBackground: {
     position: "absolute",
     width: "100%",
     height: "100%",
+    zIndex: 1,
   },
   sticker: {
     position: "absolute",
-    zIndex: 10,
+    zIndex: 100,
   },
   stickerImage: {
     width: 80,

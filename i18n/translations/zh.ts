@@ -2,6 +2,7 @@ export default {
   tabs: {
     home: "示例库",
     profile: "个人中心",
+    components: "组件库",
   },
   home: {
     title: "React Native APIs",
@@ -57,10 +58,7 @@ export default {
     },
     settings: {
       title: "设置",
-      theme: "切换主题",
       language: "语言设置",
-      notifications: "通知设置",
-      about: "关于应用",
     },
     logout: "退出登录",
     name: "开发者",

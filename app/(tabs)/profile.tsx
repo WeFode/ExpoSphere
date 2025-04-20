@@ -7,81 +7,30 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Image } from "expo-image";
-import { BlurView } from "expo-blur";
 import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import Animated, {
-  FadeIn,
-  SlideInRight,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useI18n } from "@/i18n";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-// 用户数据
-const USER_DATA = {
-  name: "开发者",
-  username: "@developer",
-  avatar: "https://picsum.photos/200/200?random=1",
-  bio: "React Native & Expo 开发爱好者，喜欢尝试各种新的API和组件。",
-};
-
 // 设置项
 const SETTINGS = [
-  {
-    id: "theme",
-    title: "切换主题",
-    icon: "color-palette-outline",
-    color: "#9C27B0",
-  },
   {
     id: "language",
     title: "语言设置",
     icon: "language-outline",
     color: "#2196F3",
   },
-  {
-    id: "notifications",
-    title: "通知设置",
-    icon: "notifications-outline",
-    color: "#FF9800",
-  },
-  {
-    id: "about",
-    title: "关于应用",
-    icon: "information-circle-outline",
-    color: "#4CAF50",
-  },
 ];
 
 // 用于存储国际化后的设置项
 const getSettings = (t: any) => [
   {
-    id: "theme",
-    title: t("profile.settings.theme"),
-    icon: "color-palette-outline",
-    color: "#9C27B0",
-  },
-  {
     id: "language",
     title: t("profile.settings.language"),
     icon: "language-outline",
     color: "#2196F3",
-  },
-  {
-    id: "notifications",
-    title: t("profile.settings.notifications"),
-    icon: "notifications-outline",
-    color: "#FF9800",
-  },
-  {
-    id: "about",
-    title: t("profile.settings.about"),
-    icon: "information-circle-outline",
-    color: "#4CAF50",
   },
 ];
 
@@ -121,7 +70,7 @@ const SettingItem = ({
 export default function Profile() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
   // 获取国际化后的设置项
@@ -146,7 +95,7 @@ export default function Profile() {
           style={styles.profileHeader}
         >
           <Image
-            source={{ uri: USER_DATA.avatar }}
+            source={{ uri: "https://picsum.photos/200/200?random=1" }}
             style={styles.avatar}
             contentFit="cover"
             transition={300}

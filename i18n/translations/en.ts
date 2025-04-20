@@ -2,6 +2,7 @@ export default {
   tabs: {
     home: "Examples",
     profile: "Profile",
+    components: "Components",
   },
   home: {
     title: "React Native APIs",
@@ -57,10 +58,7 @@ export default {
     },
     settings: {
       title: "Settings",
-      theme: "Toggle Theme",
       language: "Language Settings",
-      notifications: "Notification Settings",
-      about: "About App",
     },
     logout: "Log Out",
     name: "Developer",

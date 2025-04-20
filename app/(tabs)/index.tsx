@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
+  useColorScheme,
 } from "react-native";
-import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";

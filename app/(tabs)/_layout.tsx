@@ -2,14 +2,15 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { StyleSheet, ViewStyle } from "react-native";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import { useI18n } from "@/i18n";
-
+import React from "react";
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { t } = useI18n();
+  const [_, setLanguageChanged] = useState(0);
 
   const tabBarStyle = useMemo<ViewStyle>(
     () => ({
@@ -21,6 +22,25 @@ export default function TabLayout() {
     }),
     [],
   );
+
+  // 监听语言变化
+  useEffect(() => {
+    const checkLanguage = async () => {
+      try {
+        // 触发重新渲染
+        setLanguageChanged((prev) => prev + 1);
+      } catch (error) {
+        console.error("检查语言设置失败:", error);
+      }
+    };
+
+    // 初始检查
+    checkLanguage();
+
+    // 设置定期检查，以防语言变化
+    const interval = setInterval(checkLanguage, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Tabs

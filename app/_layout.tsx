@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect, useState } from "react";
 import { initLanguage } from "@/i18n";
 import AppSplashScreen from "./SplashScreen";
+import React from "react";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
